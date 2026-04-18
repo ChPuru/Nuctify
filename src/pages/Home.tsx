@@ -138,9 +138,9 @@ return (
                 Experience the ultimate music aggregator with native performance. Get global media keys, Discord integration, and background playback.
               </p>
 
-<div className="flex flex-wrap justify-center lg:justify-start gap-4">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
                 <a 
-                  href="#" 
+                  href="https://github.com/ChPuru/Nuctify/releases/download/exe/Nuctify_0.1.0_x64-setup.exe" 
                   className="group flex items-center gap-4 px-8 py-4 bg-white text-black rounded-2xl font-bold transition-all hover:scale-105 active:scale-95"
                 >
                   <span className="material-symbols-outlined text-2xl">desktop_windows</span>
@@ -151,7 +151,7 @@ return (
                 </a>
 
 <a 
-                  href="#" 
+                  href="https://github.com/ChPuru/Nuctify/releases/download/apk/app-release.apk" 
                   className="group flex items-center gap-4 px-8 py-4 bg-surface-container-highest border border-white/10 text-white rounded-2xl font-bold transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
                 >
                   <span className="material-symbols-outlined text-2xl">android</span>

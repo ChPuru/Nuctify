@@ -1,5 +1,10 @@
 # Nuctify
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://img.shields.io/badge/Build-v0.1.0-blue)](https://github.com/ChPuru/Nuctify/releases)
+
+### [🚀 Download Nuctify for Windows (.exe)](https://github.com/ChPuru/Nuctify/releases/download/exe/Nuctify_0.1.0_x64-setup.exe) | [📱 Download Nuctify for Android (.apk)](https://github.com/ChPuru/Nuctify/releases/download/apk/app-release.apk)
+
 Nuctify is a high-performance, cross-platform music aggregator designed to unify your streaming experience across YouTube, JioSaavn, and SoundCloud. Built with a focus on native performance and modern aesthetics, Nuctify provides a seamless experience for discovery, library management, and real-time scrobbling.
 
 ## Key Features
