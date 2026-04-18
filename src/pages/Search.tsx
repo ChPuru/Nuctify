@@ -129,12 +129,12 @@ return (
 
 {}
             <div className={`flex flex-col gap-6 ${activeTab === 'tracks' && results.tracks.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
-              {activeTab === 'tracks' && results.tracks.length > 0 && (
-                 <>
-                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Songs</h3>
-                   <TrackList tracks={results.tracks.slice(1)} showProvider={true} />
-                 </>
-              )}
+                 {activeTab === 'tracks' && results.tracks.length > 0 && (
+                  <>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Songs</h3>
+                    <TrackList tracks={results.tracks} showProvider={true} />
+                  </>
+               )}
 
 {activeTab === 'tracks' && results.tracks.length === 0 && (
                 <div className="flex flex-col items-center justify-center p-20 text-center col-span-12">
