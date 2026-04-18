@@ -90,7 +90,9 @@ const handleImportPlaylist = async (playlistId: string, playlistName: string) =>
         setImportProgress({ current, total });
       });
       setImportResult(`✅ Imported ${tracks.length} tracks from "${playlistName}"`);
-      for (const t of tracks) { toggleLike(t); }
+      if (tracks.length > 0) {
+        useLibraryStore.getState().importPlaylist(playlistName, tracks);
+      }
     } catch (e: any) {
       setImportResult(`❌ Import failed: ${e.message}`);
     }
@@ -105,7 +107,9 @@ const handleImportLikedSongs = async () => {
         setImportProgress({ current, total });
       });
       setImportResult(`✅ Imported ${tracks.length} liked songs from Spotify`);
-      for (const t of tracks) { toggleLike(t); }
+      if (tracks.length > 0) {
+        useLibraryStore.getState().likeMultiple(tracks);
+      }
     } catch (e: any) {
       setImportResult(`❌ Import failed: ${e.message}`);
     }

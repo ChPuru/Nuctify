@@ -516,6 +516,8 @@ interface LibraryState {
   removeFromPlaylist: (playlistId: string, trackId: string) => void;
   deletePlaylist: (playlistId: string) => void;
   addToRecentlyPlayed: (track: Track) => void;
+  importPlaylist: (name: string, tracks: Track[]) => void;
+  likeMultiple: (tracks: Track[]) => void;
 }
 
 export const useLibraryStore = create<LibraryState>((set, get) => ({
@@ -579,11 +581,31 @@ deletePlaylist: (playlistId) => {
     localStorage.setItem('nuctify_playlists', JSON.stringify(playlists));
   },
 
-addToRecentlyPlayed: (track) => {
+  addToRecentlyPlayed: (track) => {
     const recent = get().recentlyPlayed;
     const updated = [track, ...recent.filter(t => t.id !== track.id)].slice(0, 50);
     set({ recentlyPlayed: updated });
     localStorage.setItem('nuctify_recent', JSON.stringify(updated));
+  },
+  importPlaylist: (name, tracks) => {
+    const playlist = {
+      id: `pl-${Date.now()}`,
+      name,
+      tracks,
+      createdAt: Date.now(),
+    };
+    const updated = [...get().playlists, playlist];
+    set({ playlists: updated });
+    localStorage.setItem('nuctify_playlists', JSON.stringify(updated));
+    useToastStore.getState().addToast(`Imported playlist "${name}" with ${tracks.length} tracks`, 'success');
+  },
+  likeMultiple: (tracks) => {
+    const liked = get().likedTracks;
+    const newItems = tracks.filter(t => !liked.some(l => l.id === t.id));
+    if (newItems.length === 0) return;
+    const updated = [...newItems.map(t => ({ ...t, isLiked: true })), ...liked];
+    set({ likedTracks: updated });
+    localStorage.setItem('nuctify_liked', JSON.stringify(updated));
   },
 }));
 

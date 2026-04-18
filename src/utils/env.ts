@@ -14,14 +14,14 @@ return !!(window.__TAURI_INTERNALS__ || window.__TAURI__);
 
 export const NATIVE_API_MAP: Record<string, string> = {
 
-'/api/inv1': 'https://yewtu.be',
-  '/api/inv2': 'https://invidious.nerdvpn.de',
+'/api/inv1': 'https://invidious.projectsegfau.lt',
+  '/api/inv2': 'https://yewtu.be',
   '/api/inv3': 'https://iv.ggtyler.dev',
   '/api/invidious1': 'https://inv.nadeko.net',
 
 '/api/piped1': 'https://pipedapi.kavin.rocks',
-  '/api/piped2': 'https://api.piped.private.coffee',
-  '/api/piped3': 'https://piped.video',
+  '/api/piped2': 'https://piped.video',
+  '/api/piped3': 'https://pipedapi.kavin.rocks',
 
 '/api/jio1': 'https://saavn.sumit.co',
   '/api/jio2': 'https://jiosaavn-api-privatecvc2.vercel.app',

@@ -13,14 +13,14 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api/inv1': {
-        target: 'https://yewtu.be',
+        target: 'https://invidious.projectsegfau.lt',
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/api\/inv1/, ''),
         secure: false,
         configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
       },
       '/api/inv2': {
-        target: 'https://invidious.nerdvpn.de',
+        target: 'https://yewtu.be',
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/api\/inv2/, ''),
         secure: false,
@@ -41,14 +41,14 @@ export default defineConfig({
         configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
       },
       '/api/piped2': {
-        target: 'https://api.piped.private.coffee',
+        target: 'https://piped.video',
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/api\/piped2/, ''),
         secure: false,
         configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
       },
       '/api/piped3': {
-        target: 'https://piped.video',
+        target: 'https://pipedapi.kavin.rocks',
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/api\/piped3/, ''),
         secure: false,

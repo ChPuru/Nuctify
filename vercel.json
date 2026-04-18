@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/inv1/(.*)",
-      "destination": "https://yewtu.be/$1"
+      "destination": "https://invidious.projectsegfau.lt/$1"
     },
     {
       "source": "/api/inv2/(.*)",
-      "destination": "https://invidious.nerdvpn.de/$1"
+      "destination": "https://yewtu.be/$1"
     },
     {
       "source": "/api/inv3/(.*)",
@@ -18,11 +18,11 @@
     },
     {
       "source": "/api/piped2/(.*)",
-      "destination": "https://api.piped.private.coffee/$1"
+      "destination": "https://piped.video/$1"
     },
     {
       "source": "/api/piped3/(.*)",
-      "destination": "https://piped.video/$1"
+      "destination": "https://pipedapi.kavin.rocks/$1"
     },
     {
       "source": "/api/invidious1/(.*)",
