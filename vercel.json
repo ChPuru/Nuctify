@@ -1,80 +1,32 @@
 {
   "rewrites": [
     {
-      "source": "/api/inv1/(.*)",
-      "destination": "/api/proxy?url=https://invidious.projectsegfau.lt/$1"
+      "source": "/api/search",
+      "destination": "/api/search"
     },
     {
-      "source": "/api/inv2/(.*)",
-      "destination": "/api/proxy?url=https://yewtu.be/$1"
-    },
-    {
-      "source": "/api/inv3/(.*)",
-      "destination": "/api/proxy?url=https://iv.ggtyler.dev/$1"
-    },
-    {
-      "source": "/api/inv4/(.*)",
-      "destination": "/api/proxy?url=https://inv.nadeko.net/$1"
-    },
-    {
-      "source": "/api/inv5/(.*)",
-      "destination": "/api/proxy?url=https://invidious.no-logs.com/$1"
-    },
-    {
-      "source": "/api/piped1/(.*)",
-      "destination": "/api/proxy?url=https://pipedapi.kavin.rocks/$1"
-    },
-    {
-      "source": "/api/piped2/(.*)",
-      "destination": "/api/proxy?url=https://piped.video/$1"
-    },
-    {
-      "source": "/api/piped3/(.*)",
-      "destination": "/api/proxy?url=https://piped.mha.fi/$1"
-    },
-    {
-      "source": "/api/piped4/(.*)",
-      "destination": "/api/proxy?url=https://pipedapi.colatube.org/$1"
-    },
-    {
-      "source": "/api/invidious1/(.*)",
-      "destination": "/api/proxy?url=https://inv.nadeko.net/$1"
+      "source": "/api/stream",
+      "destination": "/api/stream"
     },
     {
       "source": "/api/jio1/(.*)",
-      "destination": "/api/proxy?url=https://saavn.sumit.co/$1"
+      "destination": "https://saavn.sumit.co/$1"
     },
     {
       "source": "/api/jio2/(.*)",
-      "destination": "/api/proxy?url=https://jiosaavn-api-privatecvc2.vercel.app/$1"
-    },
-    {
-      "source": "/api/jiosaavn1/(.*)",
-      "destination": "/api/proxy?url=https://jiosaavn-api-privatecvc2.vercel.app/$1"
+      "destination": "https://jiosaavn-api-privatecvc2.vercel.app/$1"
     },
     {
       "source": "/api/soundcloud/(.*)",
-      "destination": "/api/proxy?url=https://api-v2.soundcloud.com/$1"
-    },
-    {
-      "source": "/api/soundcloud",
-      "destination": "/api/proxy?url=https://api-v2.soundcloud.com"
+      "destination": "https://api-v2.soundcloud.com/$1"
     },
     {
       "source": "/api/sc-site/(.*)",
-      "destination": "/api/proxy?url=https://soundcloud.com/$1"
-    },
-    {
-      "source": "/api/sc-site",
-      "destination": "/api/proxy?url=https://soundcloud.com"
+      "destination": "https://soundcloud.com/$1"
     },
     {
       "source": "/api/sc-cdn/(.*)",
-      "destination": "/api/proxy?url=https://a-v2.sndcdn.com/$1"
-    },
-    {
-      "source": "/api/sc-cdn",
-      "destination": "/api/proxy?url=https://a-v2.sndcdn.com"
+      "destination": "https://a-v2.sndcdn.com/$1"
     },
     {
       "source": "/api/lrclib/(.*)",
