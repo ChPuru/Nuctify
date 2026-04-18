@@ -1,0 +1,84 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/inv1/(.*)",
+      "destination": "https://yewtu.be/$1"
+    },
+    {
+      "source": "/api/inv2/(.*)",
+      "destination": "https://invidious.nerdvpn.de/$1"
+    },
+    {
+      "source": "/api/inv3/(.*)",
+      "destination": "https://iv.ggtyler.dev/$1"
+    },
+    {
+      "source": "/api/piped1/(.*)",
+      "destination": "https://pipedapi.kavin.rocks/$1"
+    },
+    {
+      "source": "/api/piped2/(.*)",
+      "destination": "https://api.piped.private.coffee/$1"
+    },
+    {
+      "source": "/api/piped3/(.*)",
+      "destination": "https://piped.video/$1"
+    },
+    {
+      "source": "/api/invidious1/(.*)",
+      "destination": "https://inv.nadeko.net/$1"
+    },
+    {
+      "source": "/api/jio1/(.*)",
+      "destination": "https://saavn.sumit.co/$1"
+    },
+    {
+      "source": "/api/jio2/(.*)",
+      "destination": "https://jiosaavn-api-privatecvc2.vercel.app/$1"
+    },
+    {
+      "source": "/api/jiosaavn1/(.*)",
+      "destination": "https://jiosaavn-api-privatecvc2.vercel.app/$1"
+    },
+    {
+      "source": "/api/soundcloud/(.*)",
+      "destination": "https://api-v2.soundcloud.com/$1"
+    },
+    {
+      "source": "/api/sc-site/(.*)",
+      "destination": "https://soundcloud.com/$1"
+    },
+    {
+      "source": "/api/sc-cdn/(.*)",
+      "destination": "https://a-v2.sndcdn.com/$1"
+    },
+    {
+      "source": "/api/lrclib/(.*)",
+      "destination": "https://lrclib.net/$1"
+    },
+    {
+      "source": "/api/spotify-auth/(.*)",
+      "destination": "https://accounts.spotify.com/$1"
+    },
+    {
+      "source": "/api/spotify/(.*)",
+      "destination": "https://api.spotify.com/$1"
+    },
+    {
+      "source": "/api/listenbrainz/(.*)",
+      "destination": "https://api.listenbrainz.org/$1"
+    },
+    {
+      "source": "/api/lastfm/(.*)",
+      "destination": "https://ws.audioscrobbler.com/$1"
+    },
+    {
+      "source": "/api/bandcamp/(.*)",
+      "destination": "https://bandcamp.com/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -138,6 +138,13 @@ export default defineConfig({
         secure: false,
         configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
       },
+      '/api/bandcamp': {
+        target: 'https://bandcamp.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/bandcamp/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
     },
   },
 });

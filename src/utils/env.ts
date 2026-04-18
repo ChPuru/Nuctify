@@ -36,8 +36,9 @@ export const NATIVE_API_MAP: Record<string, string> = {
 '/api/spotify-auth': 'https://accounts.spotify.com',
   '/api/spotify': 'https://api.spotify.com',
 
-'/api/listenbrainz': 'https://api.listenbrainz.org',
+  '/api/listenbrainz': 'https://api.listenbrainz.org',
   '/api/lastfm': 'https://ws.audioscrobbler.com',
+  '/api/bandcamp': 'https://bandcamp.com',
 };
 
 export const resolveEndpoint = (url: string): string => {

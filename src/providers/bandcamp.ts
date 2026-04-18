@@ -11,7 +11,7 @@ export const bandcampProvider: MusicProvider = {
 async search(query: string, limit = 20): Promise<SearchResults> {
     try {
 
-const url = `https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elastic?q=${encodeURIComponent(query)}&search_filter=t`;
+const url = `/api/bandcamp/api/bcsearch_public_api/1/autocomplete_elastic?q=${encodeURIComponent(query)}&search_filter=t`;
 
 const response = await nativeFetch(url);
       if (!response.ok) {
