@@ -1,6 +1,6 @@
 import { Track, Playlist } from '../providers/types';
 import { registry } from '../providers';
-import { nativeFetch } from '../utils/env';
+import { nativeFetch, isNativeApp } from '../utils/env';
 
 const SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize';
 const SPOTIFY_TOKEN_URL = '/api/spotify-auth/api/token';
@@ -68,8 +68,10 @@ export async function initiateSpotifyLogin() {
 const verifier = generateRandomString(128);
   localStorage.setItem(SPOTIFY_CODE_VERIFIER, verifier);
 
-const challenge = await generateCodeChallenge(verifier);
-  const redirectUri = window.location.origin + '/';
+  const challenge = await generateCodeChallenge(verifier);
+  
+  // Use custom scheme for mobile/native, origin for web
+  const redirectUri = isNativeApp() ? 'nuctify://callback' : window.location.origin + '/';
 
 const params = new URLSearchParams({
     client_id: cid,
@@ -90,18 +92,27 @@ const params = new URLSearchParams({
 window.location.href = `${SPOTIFY_AUTH_URL}?${params}`;
 }
 
-export async function handleSpotifyCallback(): Promise<boolean> {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
-  const state = params.get('state');
+export async function handleSpotifyCallback(customUrl?: string): Promise<boolean> {
+  let code: string | null = null;
+  let state: string | null = null;
 
-if (!code || state !== 'nuctify-spotify-import') return false;
+  if (customUrl) {
+    const url = new URL(customUrl);
+    code = url.searchParams.get('code');
+    state = url.searchParams.get('state');
+  } else {
+    const params = new URLSearchParams(window.location.search);
+    code = params.get('code');
+    state = params.get('state');
+  }
 
-const verifier = localStorage.getItem(SPOTIFY_CODE_VERIFIER);
+  if (!code || state !== 'nuctify-spotify-import') return false;
+
+  const verifier = localStorage.getItem(SPOTIFY_CODE_VERIFIER);
   const cid = getSpotifyClientId();
   if (!verifier || !cid) return false;
 
-try {
+  try {
     const response = await nativeFetch(SPOTIFY_TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -109,7 +120,7 @@ try {
         client_id: cid,
         grant_type: 'authorization_code',
         code,
-        redirect_uri: window.location.origin + '/',
+        redirect_uri: isNativeApp() ? 'nuctify://callback' : window.location.origin + '/',
         code_verifier: verifier,
       }),
     });

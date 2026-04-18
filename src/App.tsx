@@ -14,11 +14,25 @@ import { isNativeApp } from './utils/env';
 import { usePlayerStore } from './store';
 import { useAuthStore } from './store/auth';
 import { useNavStore } from './store/nav';
+import { handleSpotifyCallback } from './integrations/spotify';
 
 let registerShortcut: any;
 if (isNativeApp()) {
   import('@tauri-apps/plugin-global-shortcut').then(m => {
     registerShortcut = m.register;
+  }).catch(() => {});
+
+  // Handle mobile deep links (Spotify auth callback)
+  import('@capacitor/app').then(({ App: CapApp }) => {
+    CapApp.addListener('appUrlOpen', async (event: any) => {
+      const url = new URL(event.url);
+      if (url.protocol === 'nuctify:' && url.host === 'callback') {
+        const success = await handleSpotifyCallback(event.url);
+        if (success) {
+          window.location.reload(); // Refresh to update Spotify connection status
+        }
+      }
+    });
   }).catch(() => {});
 }
 
