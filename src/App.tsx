@@ -22,17 +22,23 @@ if (isNativeApp()) {
   }).catch(() => {});
 }
 
+import MobileNav from './components/MobileNav';
+
 export default function App() {
   const currentPage = useNavStore((s) => s.currentPage);
   const navigate = useNavStore((s) => s.navigate);
   const { togglePlay, nextTrack, prevTrack } = usePlayerStore();
   const { showAuthModal, initialize } = useAuthStore();
 
-useEffect(() => {
+  useEffect(() => {
+    (window as any).nuctifyNavigate = navigate;
+  }, [navigate]);
+
+  useEffect(() => {
     initialize();
   }, [initialize]);
 
-useEffect(() => {
+  useEffect(() => {
     if (isNativeApp() && registerShortcut) {
       const initShortcuts = async () => {
         try {
@@ -53,17 +59,19 @@ useEffect(() => {
     }
   }, [togglePlay, nextTrack, prevTrack]);
 
-const renderPage = () => {
+  const renderPage = () => {
     if (currentPage.startsWith('playlist:')) {
       const playlistId = currentPage.replace('playlist:', '');
       return <PlaylistPage playlistId={playlistId} />;
     }
 
-switch (currentPage) {
+    switch (currentPage) {
       case 'home':
         return <HomePage />;
       case 'search':
         return <SearchPage />;
+      case 'library':
+        return <LibraryPage view="all" />;
       case 'liked':
         return <LibraryPage view="liked" />;
       case 'recent':
@@ -77,16 +85,17 @@ switch (currentPage) {
     }
   };
 
-return (
-    <div className="flex bg-background min-h-screen text-on-surface">
+  return (
+    <div className="flex bg-background min-h-screen text-on-surface content-selection-none overflow-x-hidden">
       <Sidebar currentPage={currentPage} onNavigate={navigate} />
       <TopNav />
 
-<main className="flex-1 lg:pl-64 pt-20 px-6 max-w-7xl mx-auto pb-32 overflow-x-hidden w-full relative z-10" id="main-content">
+      <main className="flex-1 lg:pl-64 pt-20 px-0 lg:px-6 max-w-7xl mx-auto pb-48 lg:pb-32 overflow-x-hidden w-full relative z-10" id="main-content">
         {renderPage()}
       </main>
 
-<PlayerBar />
+      <PlayerBar />
+      <MobileNav />
       <NowPlaying />
       <ToastContainer />
       {showAuthModal && <AuthModal />}

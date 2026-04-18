@@ -168,75 +168,30 @@ return (
         </div>
       </footer>
 
-{}
-      <div className="fixed bottom-0 left-0 w-full z-50 lg:hidden">
-        {}
-        <div className="mx-4 mb-4 h-16 glass-card bg-surface-container-lowest/80 backdrop-blur-[32px] rounded-2xl flex items-center px-4 gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.6)] cursor-pointer" onClick={toggleNowPlaying}>
-          {currentTrack ? (
-             <>
-               <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                 <img src={currentTrack.thumbnail || ''} alt="cover" className="w-full h-full object-cover" />
-               </div>
-               <div className="flex-1 overflow-hidden">
-                 <h5 className="text-xs font-bold truncate text-white">{currentTrack.title}</h5>
-                 <p className="text-[10px] text-on-surface-variant truncate">{currentTrack.artist}</p>
-               </div>
-               <div className="flex gap-4 items-center pl-2" onClick={e => e.stopPropagation()}>
-                 <button onClick={() => toggleLike(currentTrack)} className={`material-symbols-outlined transition-colors ${isLiked(currentTrack.id) ? 'text-primary filled' : 'text-slate-400'}`}>favorite</button>
-                 <button className="text-white" onClick={togglePlay}>
-                   <span className={`material-symbols-outlined text-3xl ${isPlaying && !isLoading && !isBuffering ? 'filled' : ''}`}>
-                     {isLoading || isBuffering ? 'hourglass_empty' : isPlaying ? 'pause_circle' : 'play_circle'}
-                   </span>
-                 </button>
-               </div>
-             </>
-          ) : (
-             <div className="flex-1 px-2 text-xs font-bold text-slate-500">Not Playing</div>
-          )}
-
-<div className="absolute bottom-0 left-0 w-full h-1 bg-surface-variant/30 rounded-b-2xl overflow-hidden pointer-events-none">
-            <div style={{ width: `${progress}%` }} className="h-full bg-gradient-to-r from-tertiary to-primary"></div>
+      <div className="fixed bottom-20 left-4 right-4 z-40 lg:hidden">
+        {currentTrack && (
+          <div className="h-16 glass-card bg-surface-container-highest/95 backdrop-blur-[32px] rounded-2xl flex items-center px-4 gap-4 shadow-2xl animate-[slideUp_0.3s_ease-out] cursor-pointer" onClick={toggleNowPlaying}>
+            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+              <img src={currentTrack.thumbnail || ''} alt="cover" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <h5 className="text-xs font-bold truncate text-white">{currentTrack.title}</h5>
+              <p className="text-[10px] text-slate-400 truncate">{currentTrack.artist}</p>
+            </div>
+            <div className="flex gap-4 items-center" onClick={e => e.stopPropagation()}>
+              <button onClick={() => toggleLike(currentTrack)} className={`material-symbols-outlined transition-colors ${isLiked(currentTrack.id) ? 'text-primary filled' : 'text-slate-400'}`}>favorite</button>
+              <button className="text-white" onClick={togglePlay}>
+                <span className={`material-symbols-outlined text-3xl ${isPlaying && !isLoading && !isBuffering ? 'filled' : ''}`}>
+                  {isLoading || isBuffering ? 'hourglass_empty' : isPlaying ? 'pause_circle' : 'play_circle'}
+                </span>
+              </button>
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 rounded-b-2xl overflow-hidden pointer-events-none">
+              <div style={{ width: `${progress}%` }} className="h-full bg-gradient-to-r from-tertiary to-primary"></div>
+            </div>
           </div>
-        </div>
-
-{}
-        <MobileNav toggleNowPlaying={toggleNowPlaying} />
+        )}
       </div>
     </>
-  );
-}
-
-function MobileNav({ toggleNowPlaying }: { toggleNowPlaying: () => void }) {
-  const { currentPage, navigate } = useNavStore();
-
-const NavBtn = ({ page, icon, label }: { page: string; icon: string; label: string }) => {
-    const active = currentPage === page;
-    return (
-      <button
-        onClick={() => navigate(page)}
-        className={`p-2 rounded-xl transition-all active:scale-95 flex flex-col items-center ${
-          active ? 'bg-white/20 text-white' : 'text-white/60 hover:bg-white/10'
-        }`}
-      >
-        <span className={`material-symbols-outlined mb-1 text-xl ${active ? 'filled' : ''}`}>{icon}</span>
-        <span className="text-[8px]">{label}</span>
-      </button>
-    );
-  };
-
-return (
-    <nav className="bg-gradient-to-r from-[#ba9eff] to-[#53ddfc] text-white font-['Manrope'] text-[10px] font-bold uppercase tracking-widest rounded-t-[1.5rem] shadow-[0_-8px_32px_rgba(186,158,255,0.2)] h-20 flex justify-around items-center px-6 pb-2">
-      <NavBtn page="home" icon="home" label="Home" />
-      <NavBtn page="search" icon="search" label="Search" />
-      <button
-        onClick={toggleNowPlaying}
-        className="bg-white/20 rounded-xl p-2 scale-110 shadow-lg flex flex-col items-center active:scale-95 transition-all"
-      >
-        <span className="material-symbols-outlined mb-1 text-xl filled">play_circle</span>
-        <span className="text-[8px]">Playing</span>
-      </button>
-      <NavBtn page="liked" icon="favorite" label="Library" />
-      <NavBtn page="settings" icon="settings" label="Settings" />
-    </nav>
   );
 }

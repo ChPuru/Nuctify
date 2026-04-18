@@ -75,14 +75,31 @@ export const nativeFetch = async (input: RequestInfo | URL, init?: RequestInit):
   if (typeof input === 'string') {
     const resolved = resolveEndpoint(input);
 
-if (isTauriApp()) {
+    if (isTauriApp()) {
       const tf = await getTauriFetch();
-      if (tf) {
-        return tf(resolved, init);
+      if (tf) return tf(resolved, init);
+    }
+
+    if (!!window.Capacitor) {
+      try {
+        const { CapacitorHttp } = await import('@capacitor/core');
+        const options = {
+          url: resolved,
+          method: init?.method || 'GET',
+          headers: (init?.headers as any) || {},
+          data: init?.body,
+        };
+        const resp = await CapacitorHttp.request(options);
+        return new Response(typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data), {
+          status: resp.status,
+          headers: resp.headers,
+        });
+      } catch (e) {
+        console.warn('[Env] CapacitorHttp failed, falling back to fetch', e);
       }
     }
 
-return fetch(resolved, init);
+    return fetch(resolved, init);
   }
   return fetch(input, init);
 };

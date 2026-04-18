@@ -2,7 +2,7 @@ import { MusicProvider, SearchResults, Track, StreamInfo } from './types';
 import { nativeFetch } from '../utils/env';
 
 const JIOSAAVN_INSTANCES = [
-  '/api/jio1/api',
+  '/api/jio1',
   '/api/jio2',
 ];
 
