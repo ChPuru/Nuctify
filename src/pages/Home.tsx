@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { usePlayerStore, useLibraryStore } from '../store';
 import { registry } from '../providers';
 import { Track } from '../providers/types';
+import { isNativeApp } from '../utils/env';
 
 export default function HomePage() {
   const [trending, setTrending] = useState<Track[]>([]);
@@ -126,7 +127,8 @@ return (
         </div>
       </section>
 
-<section className="mb-24 mt-12">
+      {!isNativeApp() && (
+        <section className="mb-24 mt-12">
         <div className="relative overflow-hidden rounded-[3rem] bg-surface-container-high/30 border border-white/5 p-12 lg:p-20">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
@@ -172,6 +174,7 @@ return (
           </div>
         </div>
       </section>
+      )}
 
 </div>
   );
