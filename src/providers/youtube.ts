@@ -1,15 +1,6 @@
 import { MusicProvider, SearchResults, Track, StreamInfo } from './types';
 import { nativeFetch, isNativeApp } from '../utils/env';
 
-function cleanArtistName(name: string): string {
-  return name
-    .replace(/ - Topic$/i, '')
-    .replace(/VEVO$/i, '')
-    .replace(/ Official$/i, '')
-    .replace(/ Music$/i, '')
-    .trim();
-}
-
 export const youtubeProvider: MusicProvider = {
   name: 'youtube',
   displayName: 'YouTube',
@@ -19,19 +10,12 @@ export const youtubeProvider: MusicProvider = {
 
   async search(query: string, limit = 20): Promise<SearchResults> {
     try {
+      // Disable YouTube on Web for now as requested
       if (!isNativeApp()) {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        if (!response.ok) throw new Error(`Search aggregator failed: ${response.status}`);
-        const tracks = await response.json();
-        return { 
-          tracks: tracks.slice(0, limit).map((t: any) => ({ ...t, artist: cleanArtistName(t.artist) })), 
-          albums: [], 
-          artists: [], 
-          source: 'youtube' 
-        };
+        return { tracks: [], albums: [], artists: [], source: 'youtube' };
       }
 
-      // Native App Fallback
+      // Keep YouTube on Mobile (Native) as it works via CapacitorHttp
       const response = await nativeFetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=videos`);
       const data = await response.json();
       const items = data.items || data;
@@ -40,7 +24,7 @@ export const youtubeProvider: MusicProvider = {
         return {
           id: `yt-${videoId}`,
           title: item.title,
-          artist: cleanArtistName(item.uploaderName || item.uploader || 'Unknown'),
+          artist: item.uploaderName || item.uploader || 'Unknown',
           duration: item.duration || 0,
           thumbnail: item.thumbnail || '',
           source: 'youtube' as const,
@@ -56,11 +40,8 @@ export const youtubeProvider: MusicProvider = {
 
   async getStreamUrl(track: Track): Promise<StreamInfo | null> {
     try {
-      if (!isNativeApp()) {
-        const response = await fetch(`/api/stream?id=${track.sourceId}`);
-        if (!response.ok) throw new Error('Stream aggregator failed');
-        return await response.json();
-      }
+      // YouTube streaming also disabled on web for now
+      if (!isNativeApp()) return null;
 
       const response = await nativeFetch(`https://pipedapi.kavin.rocks/streams/${track.sourceId}`);
       const data = await response.json();
@@ -79,6 +60,7 @@ export const youtubeProvider: MusicProvider = {
   },
 
   async getTrending(limit = 30): Promise<Track[]> {
+    if (!isNativeApp()) return [];
     const results = await this.search('trending music 2025', limit);
     return results.tracks;
   },

@@ -47,35 +47,40 @@ const toggleDownload = async (e: React.MouseEvent) => {
     }
   };
 
-useEffect(() => {
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName === 'INPUT') return;
+      // Don't trigger if user is typing in an input
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+
+      const state = usePlayerStore.getState();
+      const { currentTrack, isPlaying, currentTime, duration, volume } = state;
+
       switch (e.key) {
         case ' ':
           e.preventDefault();
-          togglePlay();
+          state.togglePlay();
           break;
         case 'ArrowRight':
-          if (e.shiftKey) nextTrack();
-          else seekTo(Math.min(currentTime + 5, duration));
+          if (e.shiftKey) state.nextTrack();
+          else state.seekTo(Math.min(currentTime + 5, duration));
           break;
         case 'ArrowLeft':
-          if (e.shiftKey) prevTrack();
-          else seekTo(Math.max(currentTime - 5, 0));
+          if (e.shiftKey) state.prevTrack();
+          else state.seekTo(Math.max(currentTime - 5, 0));
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setVolume(Math.min(volume + 0.05, 1));
+          state.setVolume(Math.min(volume + 0.05, 1));
           break;
         case 'ArrowDown':
           e.preventDefault();
-          setVolume(Math.max(volume - 0.05, 0));
+          state.setVolume(Math.max(volume - 0.05, 0));
           break;
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [currentTime, duration, volume, togglePlay, nextTrack, prevTrack, seekTo, setVolume]);
+  }, []); // Only register once
 
 const handleProgressClick = useCallback((e: React.MouseEvent) => {
     if (!progressRef.current || !duration) return;
@@ -179,8 +184,13 @@ return (
               <p className="text-[10px] text-slate-400 truncate">{currentTrack.artist}</p>
             </div>
             <div className="flex gap-4 items-center" onClick={e => e.stopPropagation()}>
-              <button onClick={() => toggleLike(currentTrack)} className={`material-symbols-outlined transition-colors ${isLiked(currentTrack.id) ? 'text-primary filled' : 'text-slate-400'}`}>favorite</button>
-              <button className="text-white" onClick={togglePlay}>
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleLike(currentTrack); }} 
+                className={`material-symbols-outlined transition-colors ${isLiked(currentTrack.id) ? 'text-primary filled' : 'text-slate-400'}`}
+              >
+                favorite
+              </button>
+              <button className="text-white" onClick={(e) => { e.stopPropagation(); togglePlay(); }}>
                 <span className={`material-symbols-outlined text-3xl ${isPlaying && !isLoading && !isBuffering ? 'filled' : ''}`}>
                   {isLoading || isBuffering ? 'hourglass_empty' : isPlaying ? 'pause_circle' : 'play_circle'}
                 </span>

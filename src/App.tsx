@@ -86,11 +86,11 @@ export default function App() {
   };
 
   return (
-    <div className="flex bg-background min-h-screen text-on-surface content-selection-none overflow-x-hidden">
+    <div className="flex bg-background min-h-screen text-on-surface select-none overflow-x-hidden">
       <Sidebar currentPage={currentPage} onNavigate={navigate} />
       <TopNav />
 
-      <main className="flex-1 lg:pl-64 pt-20 px-0 lg:px-6 max-w-7xl mx-auto pb-48 lg:pb-32 overflow-x-hidden w-full relative z-10" id="main-content">
+      <main className="flex-1 lg:pl-64 pt-20 px-0 lg:px-6 max-w-7xl mx-auto pb-48 lg:pb-32 overflow-x-hidden w-full relative z-[1]" id="main-content">
         {renderPage()}
       </main>
 

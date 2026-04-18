@@ -5,18 +5,24 @@ const SC_PROXY = '/api/soundcloud';
 const SC_SITE_PROXY = '/api/sc-site';
 const SC_CDN_PROXY = '/api/sc-cdn';
 
+const FALLBACK_CLIENT_IDS = [
+  'iZIs9mchVcX5SExmY60Y70FpSkInYmK4',
+  '2t99fb6fg0BiNt5vAt9vAtBoYJpW4hP3',
+  'YUKs9mchVcX5SExmY60Y70FpSkInYmK4'
+];
+
 let clientId = '';
 
 async function extractClientId(): Promise<string> {
   if (clientId) return clientId;
 
-try {
+  try {
     const response = await nativeFetch(SC_SITE_PROXY);
     const html = await response.text();
 
-const scriptMatches = html.match(/https:\/\/a-v2\.sndcdn\.com\/assets\/([a-zA-Z0-9-]+\.js)/g) || [];
+    const scriptMatches = html.match(/https:\/\/a-v2\.sndcdn\.com\/assets\/([a-zA-Z0-9-]+\.js)/g) || [];
 
-for (const fullUrl of scriptMatches.slice(-5)) {
+    for (const fullUrl of scriptMatches.slice(-5)) {
       try {
         const assetPath = fullUrl.replace('https://a-v2.sndcdn.com', SC_CDN_PROXY);
         const scriptRes = await nativeFetch(assetPath);
@@ -24,7 +30,7 @@ for (const fullUrl of scriptMatches.slice(-5)) {
         const match = scriptText.match(/client_id:"([a-zA-Z0-9]+)"/);
         if (match) {
           clientId = match[1];
-          console.log('[SoundCloud] Got client ID');
+          console.log('[SoundCloud] Got dynamic client ID');
           return clientId;
         }
       } catch {
@@ -32,10 +38,12 @@ for (const fullUrl of scriptMatches.slice(-5)) {
       }
     }
   } catch (error) {
-    console.error('[SoundCloud] Client ID extraction failed:', error);
+    console.error('[SoundCloud] ID extraction failed, using fallback:', error);
   }
 
-return '';
+  // Use a random fallback ID if extraction fails
+  clientId = FALLBACK_CLIENT_IDS[Math.floor(Math.random() * FALLBACK_CLIENT_IDS.length)];
+  return clientId;
 }
 
 export const soundcloudProvider: MusicProvider = {
