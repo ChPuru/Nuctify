@@ -5,6 +5,7 @@ const INVIDIOUS_INSTANCES = [
   '/api/inv1',
   '/api/inv2',
   '/api/inv3',
+  '/api/invidious1',
 ];
 
 const PIPED_INSTANCES = [
