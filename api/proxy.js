@@ -2,23 +2,46 @@ export const config = {
   runtime: 'edge',
 };
 
-async function safeFetch(url, options, retryWithBridge = true) {
+const USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+];
+
+async function safeFetch(url, options) {
+  const ua = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+  const headers = { ...options.headers, 'User-Agent': ua };
+
+  // 1. Primary Attempt: Direct Fetch from Vercel Edge
   try {
-    const response = await fetch(url, options);
+    const response = await fetch(url, { ...options, headers });
+    if (response.ok && response.status !== 403) return response;
     
-    // If blocked or Mirror error, try the bridge
-    if ((response.status === 403 || response.status === 429 || response.status >= 500) && retryWithBridge) {
-      const bridgeUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-      return await fetch(bridgeUrl, options);
+    // 2. Secondary Attempt: corsproxy.io Bridge
+    console.log(`[Proxy] Direct failed (${response.status}), trying corsproxy.io`);
+    const bridge1 = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+    const resp1 = await fetch(bridge1, { ...options, headers });
+    if (resp1.ok) return resp1;
+
+    // 3. Third Attempt: allorigins.win Bridge
+    console.log(`[Proxy] Bridge 1 failed, trying allorigins`);
+    const bridge2 = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const resp2 = await fetch(bridge2, { ...options, headers });
+    if (resp2.ok) {
+      const data = await resp2.json();
+      return new Response(data.contents, { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
-    
-    return response;
+
+    return response; // Return the original error if all fail
   } catch (error) {
-    if (retryWithBridge) {
-      const bridgeUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-      return await fetch(bridgeUrl, options);
+    console.error(`[Proxy] Fatal error: ${error.message}`);
+    // Final fallback to bridge
+    try {
+      const bridge = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+      return await fetch(bridge, { ...options, headers });
+    } catch {
+      throw error;
     }
-    throw error;
   }
 }
 
@@ -40,37 +63,37 @@ export default async function handler(req) {
         targetUrlObj.searchParams.set(key, value);
       }
     });
+
     const targetUrl = targetUrlObj.toString();
 
     const response = await safeFetch(targetUrl, {
+      method: req.method,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': 'application/json, text/plain, */*',
       },
     });
 
     const text = await response.text();
     
-    // Strip headers that trigger browser popups
-    const headers = new Headers();
+    const resHeaders = new Headers();
     response.headers.forEach((v, k) => {
       const lowK = k.toLowerCase();
-      if (lowK !== 'www-authenticate' && lowK !== 'content-encoding' && lowK !== 'transfer-encoding') {
-        headers.set(k, v);
+      if (!['www-authenticate', 'content-encoding', 'transfer-encoding', 'content-security-policy'].includes(lowK)) {
+        resHeaders.set(k, v);
       }
     });
-    headers.set('Access-Control-Allow-Origin', '*');
-    headers.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    
+    resHeaders.set('Access-Control-Allow-Origin', '*');
+    resHeaders.set('Cache-Control', 's-maxage=600, stale-while-revalidate');
 
     return new Response(text, {
       status: response.status,
-      headers: headers,
+      headers: resHeaders,
     });
   } catch (error) {
     return new Response(JSON.stringify({ 
-      error: 'Proxy failed to fetch target',
+      error: 'Proxy failure',
       message: error.message,
-      url: baseUrl 
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

@@ -2,31 +2,27 @@ import { MusicProvider, SearchResults, Track, StreamInfo } from './types';
 import { nativeFetch } from '../utils/env';
 
 const INVIDIOUS_INSTANCES = [
-  '/api/inv1',
-  '/api/inv2',
-  '/api/inv3',
-  '/api/invidious1',
   '/api/inv4',
+  '/api/inv1',
+  '/api/inv3',
   '/api/inv5',
 ];
 
 const PIPED_INSTANCES = [
   '/api/piped1',
-  '/api/piped2',
-  '/api/piped3',
   '/api/piped4',
 ];
 
 const instanceHealth: Map<string, { failures: number; lastFail: number }> = new Map();
 const FAILURE_THRESHOLD = 3;
-const COOLDOWN_MS = 5 * 60 * 1000;
+const COOLDOWN_MS = 10 * 60 * 1000;
+const SEARCH_TIMEOUT_MS = 30000;
 
 function isHealthy(instance: string): boolean {
   const h = instanceHealth.get(instance);
   if (!h) return true;
   if (h.failures >= FAILURE_THRESHOLD) {
-
-if (Date.now() - h.lastFail > COOLDOWN_MS) {
+    if (Date.now() - h.lastFail > COOLDOWN_MS) {
       instanceHealth.delete(instance);
       return true;
     }
@@ -46,7 +42,7 @@ function markSuccess(instance: string) {
   instanceHealth.delete(instance);
 }
 
-async function safeFetch(url: string, timeoutMs = 10000): Promise<any> {
+async function safeFetch(url: string, timeoutMs = SEARCH_TIMEOUT_MS): Promise<any> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
