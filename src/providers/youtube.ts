@@ -6,12 +6,15 @@ const INVIDIOUS_INSTANCES = [
   '/api/inv2',
   '/api/inv3',
   '/api/invidious1',
+  '/api/inv4',
+  '/api/inv5',
 ];
 
 const PIPED_INSTANCES = [
   '/api/piped1',
   '/api/piped2',
   '/api/piped3',
+  '/api/piped4',
 ];
 
 const instanceHealth: Map<string, { failures: number; lastFail: number }> = new Map();
