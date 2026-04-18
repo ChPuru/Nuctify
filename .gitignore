@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs
+dist/
+build/
+bin/
+target/
+src-tauri/target/
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+
+# Android Specific
+android/.gradle/
+android/app/build/
+android/app/release/
+android/app/debug/
+*.apk
+*.aar
+*.jks
+local.properties
+
+# Tauri Specific
+src-tauri/gen/
+src-tauri/target/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+tsconfig.tsbuildinfo

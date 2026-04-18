@@ -1,0 +1,249 @@
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&amp;family=Manrope:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-tertiary-container": "#19001e",
+                  "tertiary-container": "#de4bf4",
+                  "secondary-fixed-dim": "#48d4f3",
+                  "surface-dim": "#0e0e13",
+                  "on-secondary-fixed-variant": "#005969",
+                  "inverse-primary": "#6e3bd7",
+                  "background": "#0e0e13",
+                  "tertiary": "#ec63ff",
+                  "error-container": "#a70138",
+                  "primary-fixed": "#ae8dff",
+                  "surface-bright": "#2c2b33",
+                  "on-error-container": "#ffb2b9",
+                  "on-tertiary-fixed-variant": "#660075",
+                  "on-secondary-container": "#ecfaff",
+                  "inverse-on-surface": "#55545b",
+                  "on-primary-container": "#2b006e",
+                  "on-tertiary-fixed": "#300038",
+                  "on-surface-variant": "#acaab1",
+                  "surface": "#0e0e13",
+                  "surface-container-lowest": "#000000",
+                  "surface-container-low": "#131319",
+                  "error": "#ff6e84",
+                  "primary": "#ba9eff",
+                  "secondary-container": "#00687a",
+                  "on-primary-fixed": "#000000",
+                  "on-error": "#490013",
+                  "on-secondary": "#004b58",
+                  "surface-container-high": "#1f1f26",
+                  "secondary": "#53ddfc",
+                  "secondary-dim": "#40ceed",
+                  "inverse-surface": "#fcf8ff",
+                  "on-primary-fixed-variant": "#370086",
+                  "tertiary-dim": "#ec63ff",
+                  "surface-tint": "#ba9eff",
+                  "on-primary": "#39008c",
+                  "on-tertiary": "#3d0047",
+                  "outline": "#76747b",
+                  "surface-variant": "#25252d",
+                  "secondary-fixed": "#65e1ff",
+                  "outline-variant": "#48474d",
+                  "surface-container": "#19191f",
+                  "tertiary-fixed-dim": "#ef6eff",
+                  "primary-container": "#ae8dff",
+                  "error-dim": "#d73357",
+                  "on-background": "#f9f5fd",
+                  "surface-container-highest": "#25252d",
+                  "primary-dim": "#8455ef",
+                  "tertiary-fixed": "#f487ff",
+                  "on-surface": "#f9f5fd",
+                  "on-secondary-fixed": "#003a45",
+                  "primary-fixed-dim": "#a27cff"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Plus Jakarta Sans"],
+                  "body": ["Manrope"],
+                  "label": ["Manrope"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .glass-morphism {
+      background: rgba(14, 14, 19, 0.4);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+    .lyrics-gradient {
+      mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+    }
+    .visualizer-bar {
+      transition: height 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body overflow-hidden selection:bg-secondary/30">
+<!-- Immersive Background Shell -->
+<div class="fixed inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 z-10"></div>
+<img class="w-full h-full object-cover scale-110 blur-[80px] opacity-60" data-alt="Abstract vibrant purple and blue ethereal nebulae with cinematic lighting and soft bokeh effects" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1thP5wcjpkt_z7FH6FZLjh7hlMYIvgJ5Tw8jC5vsvcwvZqOIDF2IKW4Em7Msiz8Qg5n15wDlsA34zFDxBYwQxRhG5faa595vVJ3wxh_jNe7pHHsl6vyzgPYZFdsMdctC1qOVkWYYaKMuaGW2-5fAL7rhKMRysEljVHRPGs_F__XOisfVARZQohHrHSEIC_-GZARqA06bofWngVD5TcUg4P5vUIwLyQq-0zTKBCsWkJVM7VACA9TtUAhc9ciVfS0opBGkIrN0yU5g"/>
+</div>
+<!-- Header Actions -->
+<header class="fixed top-0 left-0 w-full h-20 px-8 flex items-center justify-between z-50">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white">expand_more</span>
+</div>
+<div>
+<p class="text-[10px] font-label font-bold uppercase tracking-[0.2em] text-on-surface-variant">Playing from Playlist</p>
+<p class="font-headline font-bold text-sm tracking-tight text-white">Midnight Drive Anthems</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-white">cast</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-white">more_vert</span>
+</button>
+<button class="ml-4 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center gap-2 group transition-all">
+<span class="material-symbols-outlined text-sm group-hover:rotate-90 transition-transform">close</span>
+<span class="text-xs font-bold uppercase tracking-widest">Close</span>
+</button>
+</div>
+</header>
+<!-- Main Immersive Content -->
+<main class="relative h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-8 lg:px-24 pt-20 pb-32 z-20">
+<!-- Left Section: Artwork & Meta -->
+<div class="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left space-y-8">
+<div class="relative group">
+<!-- Floating Visualizer Elements around artwork -->
+<div class="absolute -inset-4 bg-gradient-to-r from-primary to-secondary opacity-20 blur-2xl group-hover:opacity-40 transition-opacity"></div>
+<div class="relative w-64 h-64 md:w-80 md:h-80 lg:w-[420px] lg:h-[420px] rounded-2xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
+<img class="w-full h-full object-cover" data-alt="Close-up of a holographic vinyl record with iridescent reflections in shades of neon violet and teal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4oXAMVG1wlRIJ57obhcCrLYca6BZMvZTjMd0_h5ImtKKTYjDdtnnGY7chzdS2yiCx9UkOkTPXqtc-YKQWVbjYZCKZV4WnW0kj80J_OKlercGG-zqLEhdnH57uaaZfEZafOox6nWYajTit6pUuJw-KEb-O8RM7Dqt2-nExzJ1vntHJsOiZrKvsAs5kJv4kA2L0qJ_pGele_IPHjOK3ODqqiXnIu30Ye-hfeb-iPv1IHxjptCuPAKRwrsLnsliwKeL4O6NWONhbWBY"/>
+</div>
+</div>
+<div class="space-y-2">
+<h1 class="text-4xl md:text-5xl lg:text-7xl font-headline font-extrabold tracking-tighter text-white">Neon Horizon</h1>
+<p class="text-lg md:text-xl font-body text-secondary font-medium tracking-wide">Synthetix Waves <span class="mx-2 text-on-surface-variant/40">•</span> <span class="text-on-surface-variant">2024 Release</span></p>
+</div>
+<!-- Live Visualizer Component -->
+<div class="hidden lg:flex items-end gap-1.5 h-12">
+<div class="w-1.5 bg-secondary visualizer-bar" style="height: 40%"></div>
+<div class="w-1.5 bg-secondary visualizer-bar" style="height: 70%"></div>
+<div class="w-1.5 bg-primary visualizer-bar" style="height: 100%"></div>
+<div class="w-1.5 bg-tertiary visualizer-bar" style="height: 60%"></div>
+<div class="w-1.5 bg-secondary visualizer-bar" style="height: 85%"></div>
+<div class="w-1.5 bg-secondary visualizer-bar" style="height: 45%"></div>
+<div class="w-1.5 bg-primary visualizer-bar" style="height: 90%"></div>
+<div class="w-1.5 bg-tertiary visualizer-bar" style="height: 30%"></div>
+<div class="w-1.5 bg-secondary visualizer-bar" style="height: 65%"></div>
+<div class="w-1.5 bg-primary visualizer-bar" style="height: 50%"></div>
+</div>
+</div>
+<!-- Right Section: Synced Lyrics -->
+<div class="hidden lg:flex flex-col w-1/2 h-full max-w-xl pl-12 justify-center">
+<div class="h-[500px] overflow-y-auto custom-scrollbar lyrics-gradient space-y-12 pr-8">
+<p class="text-4xl font-headline font-bold text-white/20 hover:text-white/40 transition-colors cursor-pointer">Searching for the signals in the dark</p>
+<p class="text-4xl font-headline font-bold text-white/20 hover:text-white/40 transition-colors cursor-pointer">Lost between the shadows and the sparks</p>
+<p class="text-5xl lg:text-6xl font-headline font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/40 leading-tight">Neon lights are bleeding through the glass</p>
+<p class="text-4xl font-headline font-bold text-white/20 hover:text-white/40 transition-colors cursor-pointer">Watching all the digital hours pass</p>
+<p class="text-4xl font-headline font-bold text-white/20 hover:text-white/40 transition-colors cursor-pointer">Caught inside a rhythm made of chrome</p>
+<p class="text-4xl font-headline font-bold text-white/20 hover:text-white/40 transition-colors cursor-pointer">Finding where the static feels like home</p>
+</div>
+</div>
+</main>
+<!-- Persistent Player Controls (Glass Panel) -->
+<section class="fixed bottom-0 left-0 w-full z-50 p-6 md:p-8">
+<div class="glass-morphism rounded-[2.5rem] p-6 md:p-8 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6 md:gap-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+<!-- Progress Bar -->
+<div class="w-full md:flex-1 order-1">
+<div class="flex justify-between items-center mb-3">
+<span class="text-xs font-label font-bold tracking-widest text-on-surface-variant">02:44</span>
+<span class="text-xs font-label font-bold tracking-widest text-on-surface-variant">04:12</span>
+</div>
+<div class="relative w-full h-1.5 bg-white/10 rounded-full group cursor-pointer">
+<div class="absolute top-0 left-0 h-full w-[65%] bg-gradient-to-r from-tertiary via-primary to-secondary rounded-full">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+</div>
+</div>
+<!-- Controls -->
+<div class="flex items-center gap-6 md:gap-8 order-2">
+<button class="text-on-surface-variant hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">shuffle</span>
+</button>
+<button class="text-white hover:text-secondary transition-colors">
+<span class="material-symbols-outlined text-3xl">skip_previous</span>
+</button>
+<!-- Play/Pause Gradient Circle -->
+<button class="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-on-primary-container shadow-[0_8px_24px_rgba(186,158,255,0.4)] active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="text-white hover:text-secondary transition-colors">
+<span class="material-symbols-outlined text-3xl">skip_next</span>
+</button>
+<button class="text-on-surface-variant hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">repeat</span>
+</button>
+</div>
+<!-- Right Utils -->
+<div class="hidden lg:flex items-center gap-6 order-3">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">volume_up</span>
+<div class="w-24 h-1 bg-white/10 rounded-full relative overflow-hidden">
+<div class="absolute left-0 top-0 h-full w-[80%] bg-white rounded-full"></div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined text-white">playlist_play</span>
+</button>
+<button class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Bottom Navigation (Shared Component Integration) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 h-20 flex justify-around items-center px-6 pb-2 md:hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-[#ba9eff] to-[#53ddfc] opacity-90 backdrop-blur-[24px] rounded-t-[1.5rem]"></div>
+<div class="relative flex justify-around items-center w-full">
+<div class="flex flex-col items-center gap-1 text-white/70">
+<span class="material-symbols-outlined text-2xl">equalizer</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest">Equalizer</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/70">
+<span class="material-symbols-outlined text-2xl">shuffle</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest">Crossfade</span>
+</div>
+<div class="bg-white/20 rounded-xl p-2 scale-110 flex flex-col items-center gap-1 text-white">
+<span class="material-symbols-outlined text-2xl">play_circle</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest">Now Playing</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/70">
+<span class="material-symbols-outlined text-2xl">download</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest">Download</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/70">
+<span class="material-symbols-outlined text-2xl">format_list_bulleted</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest">Queue</span>
+</div>
+</div>
+</nav>
+</body></html>

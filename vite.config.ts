@@ -1,0 +1,143 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    port: 3000,
+    proxy: {
+      '/api/inv1': {
+        target: 'https://yewtu.be',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/inv1/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/inv2': {
+        target: 'https://invidious.nerdvpn.de',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/inv2/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/inv3': {
+        target: 'https://iv.ggtyler.dev',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/inv3/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/piped1': {
+        target: 'https://pipedapi.kavin.rocks',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/piped1/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/piped2': {
+        target: 'https://api.piped.private.coffee',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/piped2/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/piped3': {
+        target: 'https://piped.video',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/piped3/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/invidious1': {
+        target: 'https://inv.nadeko.net',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/invidious1/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/jio1': {
+        target: 'https://saavn.sumit.co',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/jio1/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/jio2': {
+        target: 'https://jiosaavn-api-privatecvc2.vercel.app',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/jio2/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/jiosaavn1': {
+        target: 'https://jiosaavn-api-privatecvc2.vercel.app',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/jiosaavn1/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/soundcloud': {
+        target: 'https://api-v2.soundcloud.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/soundcloud/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/sc-site': {
+        target: 'https://soundcloud.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/sc-site/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/sc-cdn': {
+        target: 'https://a-v2.sndcdn.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/sc-cdn/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/lrclib': {
+        target: 'https://lrclib.net',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/lrclib/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/spotify-auth': {
+        target: 'https://accounts.spotify.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/spotify-auth/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/spotify': {
+        target: 'https://api.spotify.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/spotify/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/listenbrainz': {
+        target: 'https://api.listenbrainz.org',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/listenbrainz/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+      '/api/lastfm': {
+        target: 'https://ws.audioscrobbler.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/lastfm/, ''),
+        secure: false,
+        configure: (proxy) => { proxy.on('proxyRes', (proxyRes) => { delete proxyRes.headers['www-authenticate']; }); },
+      },
+    },
+  },
+});

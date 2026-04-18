@@ -1,0 +1,326 @@
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-secondary": "#004b58",
+                  "surface-container-low": "#131319",
+                  "background": "#0e0e13",
+                  "secondary-dim": "#40ceed",
+                  "surface-dim": "#0e0e13",
+                  "on-secondary-container": "#ecfaff",
+                  "on-secondary-fixed-variant": "#005969",
+                  "on-primary": "#39008c",
+                  "primary": "#ba9eff",
+                  "on-primary-fixed-variant": "#370086",
+                  "on-tertiary-container": "#19001e",
+                  "on-tertiary": "#3d0047",
+                  "inverse-primary": "#6e3bd7",
+                  "surface-bright": "#2c2b33",
+                  "on-tertiary-fixed": "#300038",
+                  "on-surface-variant": "#acaab1",
+                  "inverse-surface": "#fcf8ff",
+                  "on-secondary-fixed": "#003a45",
+                  "on-background": "#f9f5fd",
+                  "primary-fixed-dim": "#a27cff",
+                  "on-tertiary-fixed-variant": "#660075",
+                  "on-error": "#490013",
+                  "secondary": "#53ddfc",
+                  "primary-dim": "#8455ef",
+                  "on-error-container": "#ffb2b9",
+                  "outline": "#76747b",
+                  "secondary-fixed": "#65e1ff",
+                  "tertiary-dim": "#ec63ff",
+                  "on-surface": "#f9f5fd",
+                  "on-primary-fixed": "#000000",
+                  "on-primary-container": "#2b006e",
+                  "error-dim": "#d73357",
+                  "inverse-on-surface": "#55545b",
+                  "outline-variant": "#48474d",
+                  "primary-fixed": "#ae8dff",
+                  "error": "#ff6e84",
+                  "secondary-fixed-dim": "#48d4f3",
+                  "secondary-container": "#00687a",
+                  "surface": "#0e0e13",
+                  "primary-container": "#ae8dff",
+                  "error-container": "#a70138",
+                  "surface-container": "#19191f",
+                  "tertiary-container": "#de4bf4",
+                  "surface-tint": "#ba9eff",
+                  "tertiary-fixed": "#f487ff",
+                  "surface-variant": "#25252d",
+                  "tertiary-fixed-dim": "#ef6eff",
+                  "surface-container-lowest": "#000000",
+                  "surface-container-highest": "#25252d",
+                  "tertiary": "#ec63ff",
+                  "surface-container-high": "#1f1f26"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Plus Jakarta Sans"],
+                  "body": ["Manrope"],
+                  "label": ["Manrope"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-effect {
+      backdrop-filter: blur(24px);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen pb-40">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 right-0 w-full lg:pl-64 h-16 flex justify-between items-center px-8 z-30 bg-[#0e0e13]/60 backdrop-blur-xl font-['Manrope'] text-sm uppercase tracking-[0.05em]">
+<div class="flex items-center gap-4 flex-1">
+<span class="text-xl font-black text-white lg:hidden">Nuctify</span>
+<div class="hidden lg:flex gap-8 items-center">
+<a class="text-slate-400 hover:text-[#53ddfc] transition-colors" href="#">Artists</a>
+<a class="text-slate-400 hover:text-[#53ddfc] transition-colors" href="#">Albums</a>
+<a class="text-slate-400 hover:text-[#53ddfc] transition-colors" href="#">Podcasts</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-slate-400 hover:text-[#53ddfc] cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-slate-400 hover:text-[#53ddfc] cursor-pointer" data-icon="settings">settings</span>
+<div class="h-8 w-8 rounded-full bg-surface-container-highest border border-white/15 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a stylish user with neon lighting reflections on their face and dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNnJkL9wJzu9_ZghS93zqqEGQxqnJ3jyZmTbfT9D2FGsiHsGcEPO6zzzCfEWDiHYyTgga0fuUPa9WOSiy1Yb4EGpb_bbklS1hIxeHoQdinAKU3bWv7_1lgdRa_R17X6u_Zqadf0uvAx9T1ZV4XvRAc6dJ6VjCXL5e68_GPf6l8_F5NBJP_iG4UIr5teg6ReWpRxLIpSpXax-J2ZOurFIjTNJMeEO5wOsX5fni-F2zmLDRlxOCt-Rpc3Tdzl76GldzDbJNReYp43jA"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Shared Component - Desktop Only) -->
+<aside class="fixed left-0 top-0 h-full z-40 h-full w-64 hidden lg:flex flex-col border-r border-white/15 bg-[#0e0e13]/80 backdrop-blur-3xl shadow-[0_40px_40px_rgba(255,255,255,0.06)] font-['Plus_Jakarta_Sans'] font-medium tracking-wide">
+<div class="p-8">
+<h1 class="text-2xl font-bold tracking-tighter bg-gradient-to-r from-[#ba9eff] to-[#53ddfc] bg-clip-text text-transparent">Nuctify</h1>
+<p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Premium Audio</p>
+</div>
+<div class="flex-1 px-4 space-y-2">
+<div class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/10 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>Home</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 rounded-xl text-white border-r-2 border-[#ba9eff] bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span>Explore</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/10 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="library_music">library_music</span>
+<span>Library</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/10 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="queue_music">queue_music</span>
+<span>Playlists</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/10 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="radio">radio</span>
+<span>Radios</span>
+</div>
+</div>
+<div class="p-6 mt-auto border-t border-white/5 space-y-4">
+<button class="w-full py-3 bg-gradient-to-r from-primary to-secondary rounded-xl text-on-primary font-bold text-sm scale-98 active:scale-95 transition-transform">
+        Upgrade to Pro
+      </button>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-4 px-4 py-2 text-slate-400 hover:text-white transition-all cursor-pointer text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="settings">settings</span>
+<span>Settings</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-2 text-slate-400 hover:text-white transition-all cursor-pointer text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="help">help</span>
+<span>Support</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Search Content -->
+<main class="lg:pl-64 pt-20 px-6 max-w-7xl mx-auto">
+<!-- Hero Search Bar -->
+<section class="mt-8 mb-12">
+<div class="relative group">
+<div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-primary" data-icon="search">search</span>
+</div>
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-5 pl-14 pr-6 text-on-background placeholder:text-outline-variant focus:ring-2 focus:ring-secondary/50 transition-all text-lg font-medium glass-effect" placeholder="Artists, songs, or podcasts" type="text"/>
+</div>
+</section>
+<!-- Recent Searches -->
+<section class="mb-12">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline text-headline-md text-on-background">Recent Searches</h2>
+<span class="text-label-sm uppercase tracking-widest text-primary cursor-pointer">Clear all</span>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-6 px-6">
+<!-- Search Item -->
+<div class="flex-shrink-0 flex items-center gap-3 bg-surface-container-high p-3 pr-5 rounded-2xl border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<div class="h-12 w-12 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="abstract colorful soundwave visual with vibrant purple and cyan digital particles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdgL5gI8NYLuSzruCp_igRPW77FIistbmWV7Ta7yJzPSm2R9PTFcbuRR1_SAI6SJsmj9YrNu6P-JOepbA5cW6XywwcjRjNStCKL7Iapnx0urxTvvO7UR9wbjMXzU0oeaiW6Zse5vNUyy0SBZLtADWDSs8XqO03sNNmQaqRGCnVibiDl8E70a7NVHBjnWrwdsg7G2RyNIZwAIpGU8xLfSmbDg0oyPwlvO08YYofxm3Stm6jNwaa7MI9KF76-0ktoPOZoE1rv7nCRWU"/>
+</div>
+<div>
+<p class="font-bold text-sm">Nightcity Vibes</p>
+<p class="text-[10px] text-outline-variant uppercase tracking-wider">Playlist</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm group-hover:text-error transition-colors" data-icon="close">close</span>
+</div>
+<!-- Search Item -->
+<div class="flex-shrink-0 flex items-center gap-3 bg-surface-container-high p-3 pr-5 rounded-2xl border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<div class="h-12 w-12 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="cinematic close up of a retro synthesizer with glowing neon buttons in a dark room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbFMPoZuL5Q8zCh0MIxKK6vI9nGX6ObA1hWqn6ayVD8wxitzjV19VD8hydqV0GeZG85OssfQ1-_kXFw7O86rDFpaMYPf6llO3_Pt6tUGIIg7TQVAqNBAAILASMG2Jv8vKTrdT-jOLN82Zqm93TQT1SJibIuV-gdzuiiXfJR0A-laCI8iqJvPPvoLxkFIZ7m1Y4A6tt987Vn3HMpYzt5lRGWOm0e6MmM3sZo4RdCPaaeu85m5YZlkU1fxqPRX4e1jBs_HcPAmLcTnE"/>
+</div>
+<div>
+<p class="font-bold text-sm">Afterglow</p>
+<p class="text-[10px] text-outline-variant uppercase tracking-wider">Artist</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm group-hover:text-error transition-colors" data-icon="close">close</span>
+</div>
+<!-- Search Item -->
+<div class="flex-shrink-0 flex items-center gap-3 bg-surface-container-high p-3 pr-5 rounded-2xl border border-white/5 hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<div class="h-12 w-12 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="silhouette of a DJ performing at a night club with deep purple atmospheric lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1br6cRpyHvEDJ6U_3fJQ9ax5cQuNthYccPgFxLK1ZYIuxbRGUPBnLpcFGhxt_KdNs47pygL7FRq_VyuF7jg-qIZq0jjfKI3jvDRMIhlX0VqEV3Vyw6bYp0P5nCjfrqoLSsBOF4prdtjCz-tUa6g9U86X5j2vpOb_UIOhagxNTlpZFAU2Mj2f-Ogq84PwStAY6c1pySqXoTWJjZltEJUN12Fh7Iz8BMMmwc68SPl_isHo0qHOa8KU-u0jfyzUI2GMqIbpOfw5CEhA"/>
+</div>
+<div>
+<p class="font-bold text-sm">Dark Techno</p>
+<p class="text-[10px] text-outline-variant uppercase tracking-wider">Genre</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm group-hover:text-error transition-colors" data-icon="close">close</span>
+</div>
+</div>
+</section>
+<!-- Browse Categories -->
+<section>
+<h2 class="font-headline text-headline-md text-on-background mb-8">Browse Categories</h2>
+<!-- Asymmetric Bento Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-20">
+<!-- Large Card -->
+<div class="col-span-2 relative aspect-[2/1] rounded-3xl overflow-hidden group cursor-pointer border border-white/5">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/80 to-tertiary/40 mix-blend-overlay z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="cyberpunk city street at night with heavy pink and purple neon signs and rain reflections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDu8C_YHX3cxSOA3h9phBFQIvXgj3rCm6J1UBsUMtJPavqK_oRJ-AF4kUTWcCtUSa6t_wXv4wGQ1gRdOydmkF6E0cIvweHMlKFk6Y8iiWqlE2Ix1T2gMPaJnrp9KkRPtFphXcdzbm7RYTwcYvYuYuM26kDMEKylOzv9wJ4aRS9vDj3ju52evvYXwh3YdaUV1a_opugLdfpsE9TeO3hq-tZTcy5TiVUNwrQB84W0gBmjZcMpMnxAPtfdbQoQ2LJtdln4FObmBG_yIM"/>
+<div class="absolute bottom-6 left-6 z-20">
+<span class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] uppercase tracking-widest text-white mb-2 inline-block">Trending</span>
+<h3 class="font-headline text-3xl font-bold text-white tracking-tight">Synthwave</h3>
+</div>
+</div>
+<!-- Medium Card -->
+<div class="relative aspect-square rounded-3xl overflow-hidden group cursor-pointer border border-white/5">
+<div class="absolute inset-0 bg-gradient-to-tr from-secondary/60 to-transparent mix-blend-multiply z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="close up of bubbling water with deep blue and cyan lighting effects" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcoMHpCrk5F9VSqryH3D54ZA_0TwqXg35Q2TBKTgRfZPU5oB87RJ_XgRAtmS3LiMvkngFV5dlrvbTpk8OBsep0Zb2lxoPxy4VmoHYr-oW-9wnsSW87FNxkujCV7VKD_h7YS96GFudBAFPl3YkRKsVkHCz31Okv_0VB-wtGiw5boyIzUchk1eLdSLFx6t9Mvc_-J7iP8ipgnsISc3maGXubXsMn9Kh7ZKDw9vEH6FBNJKOAMDJtwPHSxIQs4Rl9dyo98xzK_Z7DSW4"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h3 class="font-headline text-xl font-bold text-white">Deep Bass</h3>
+</div>
+</div>
+<!-- Medium Card -->
+<div class="relative aspect-square rounded-3xl overflow-hidden group cursor-pointer border border-white/5">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface-container-lowest/80 z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="a stack of vintage vinyl records with soft warm glowing aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsfdlBlfgcl0sZhxWJ0w3Fo8Vktp883feRCJCDLvnf2HA_sa2JY6ZzsD9wQIYefC1KjO_oavlh1J23lEhAJggfwEKxIXQrEtDTjayUx_9Ivtq-aSY35t83SpLZ8s-BcQIK64yZynIq8U_5sYDZVXsHA8Xo_MQMpufjtfP351JqF-s5yV-f6YC_0z2C4D_lNYkcM1e_6Qbtkb1poo1hqg60OCT74Dm_v0MMC4mXjGHHSY0-El3SfeCzFVY7NsMstOpyiT_LhJLdBGU"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h3 class="font-headline text-xl font-bold text-white">Lo-Fi</h3>
+</div>
+</div>
+<!-- Tall Card (Mobile adaptation) -->
+<div class="relative aspect-[3/4] md:aspect-square rounded-3xl overflow-hidden group cursor-pointer border border-white/5">
+<div class="absolute inset-0 bg-gradient-to-t from-error-container/60 to-transparent z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="abstract explosion of red and orange smoke against a pitch black background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7afot7vux89bUBDCpt7bHdpeZEJN500MBd9bB3Ks_H9mymQFLK3CF7Legc3Iga6mm3Bdm1sCzxbzxNn634NsXhz-eb5LLMJM7e-CJtIfi1hCYvAk8X6QrsEz3yHbnyZKNAjLkdcu79UKtPBRI6GrA-gW-ZckKDjdM1XF8HpHdx89iDGTnGgDrLU-nwaUAzrCVK89_E-er-Oc-AZax0uHqTnb_t51NJGNk4u6btM8TucM_vA0vHIx17laB4Eabjx0X_tBCD_xY2A0"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h3 class="font-headline text-xl font-bold text-white">Hardcore</h3>
+</div>
+</div>
+<!-- Medium Card -->
+<div class="relative aspect-square rounded-3xl overflow-hidden group cursor-pointer border border-white/5">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/40 to-secondary/40 backdrop-blur-sm mix-blend-screen z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="blurred stage lights with soft pastel colors of pink and light blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0erMNfjVt5aFit0dY0JF792ibt6hW8dXqsmomXCfa2OmVgg1QJage6HCohMJZPhgjb4zkJWmOUiqAdhokqP3aK_JQhkmAzVm924FmhBwZqtALhCI16eHvfrPDlDdeENosAceU-DGd7XuT7cvQ4k5MKce9dsfDE0-_XfGTrYJReClmwfb80_bnXDT5lhUKTh6PEzLCmgNxZX3MPE5duLi635-GjfBCvXZixeUzzNuHJJRrAC62LFerfVJuEOtlV-SA5F4Z8AfBrLY"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h3 class="font-headline text-xl font-bold text-white">Pop</h3>
+</div>
+</div>
+<!-- Medium Card -->
+<div class="relative aspect-square rounded-3xl overflow-hidden group cursor-pointer border border-white/5">
+<div class="absolute inset-0 bg-gradient-to-bl from-tertiary-fixed-dim/60 to-background/40 z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="electric guitar player in deep shadows with sharp purple rim lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4J_pub2BGdD6R3G2ZoIxNcX2d2RvCLvDMXuoXzhQLUu6XHAyMwZX1xL2HMZF7-18ynRQ0C22ttpv3dtVnGEdj5CXE9BJCyDK09wJ2j2GL_aLMIJgEh_3YsjJ5aV3dcBkaQ1FkqQoJUhC2JBsWkZZnihNCmkZMkUgigYF33-pr_VLnxmxUM4Q7mKjmDUlG9DhkuEWqeqs2daIncUUwqQ_V7KCxV2LtzLrTdRRGBTB-h3tIxZnDnvo25EzbhwnSkjeOqBaFcHLbkx4"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h3 class="font-headline text-xl font-bold text-white">Rock</h3>
+</div>
+</div>
+<!-- Medium Card -->
+<div class="relative aspect-square rounded-3xl overflow-hidden group cursor-pointer border border-white/5">
+<div class="absolute inset-0 bg-gradient-to-tr from-secondary-fixed/40 to-transparent z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="a field of lush green grass with soft morning mist and cool blue light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWCTTnilnU2JO9tHYgJOru4_yqB2gJWmRt6mlGUj9jg2_TaI97JJD38tZ8b1y-5nf-ACChyVzo289xTTc5YRgGAHrLQXJLY4m4CiUtrlPJFOdfgWmeQ0vt7w6g9HGRDDIcmqJGNzxYD4ZvIhFx1ifc9Fp1vKk4Ik_gP-6QBCrCIETDjWhKvfZQSq5xJP9AzmMWKlO5WQbPPWINOYpr7667CbF36s_QcqJ5R0etcnOsIzrE6FQIKFFCj_UDdVUkjNkntQukt2B_cME"/>
+<div class="absolute bottom-6 left-6 z-20">
+<h3 class="font-headline text-xl font-bold text-white">Nature</h3>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Shared Component) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 h-20 flex justify-around items-center px-6 pb-2 bg-gradient-to-r from-[#ba9eff] to-[#53ddfc] backdrop-blur-[24px] rounded-t-[1.5rem] shadow-[0_-8px_32px_rgba(186,158,255,0.2)] font-['Manrope'] text-[10px] font-bold uppercase tracking-widest text-white">
+<div class="flex flex-col items-center gap-1 text-white/70 p-2 cursor-pointer transition-all hover:bg-white/30 rounded-xl">
+<span class="material-symbols-outlined" data-icon="equalizer">equalizer</span>
+<span>Equalizer</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/70 p-2 cursor-pointer transition-all hover:bg-white/30 rounded-xl">
+<span class="material-symbols-outlined" data-icon="shuffle">shuffle</span>
+<span>Crossfade</span>
+</div>
+<div class="flex flex-col items-center gap-1 bg-white/20 rounded-xl p-2 scale-110 cursor-pointer shadow-lg">
+<span class="material-symbols-outlined text-2xl" data-icon="play_circle" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<span class="hidden">Now Playing</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/70 p-2 cursor-pointer transition-all hover:bg-white/30 rounded-xl">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+<span>Download</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/70 p-2 cursor-pointer transition-all hover:bg-white/30 rounded-xl">
+<span class="material-symbols-outlined" data-icon="format_list_bulleted">format_list_bulleted</span>
+<span>Queue</span>
+</div>
+</nav>
+<!-- Floating Now Playing Indicator (Contextual Mini Player) -->
+<div class="fixed bottom-24 left-6 right-6 h-16 bg-surface-container-high/80 glass-effect border border-white/10 rounded-2xl z-40 px-4 flex items-center justify-between lg:left-[calc(16rem+1.5rem)]">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 animate-pulse">
+<img class="w-full h-full object-cover" data-alt="album art featuring neon lights in a futuristic city" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlwa6pkmzK26nZ0NyAzn4-rNnbJjvrGrz94f0ANYhAf6Np_7-m3YWJ7DLuN1KhW0v5Z6-h786r0lfEnt3JLHeviSysbiBrvesKMltbesKQSR-Zf01RXbG-Ft27VrceyO15Gnw0H-ctjRUHOZ4nPM680rBSTd9B2cJgvE6TH9i3DILb1EjAEFkJ3vw-WhG_EAqCDjUyWIKmce4pKXcG0IqjzmI1T04G6eJd9cNFYQFxi1itBgx2Kd3CNIpmBzDAQjvXearjL_kteSM"/>
+</div>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Neon Tokyo Nights</p>
+<p class="text-[10px] text-primary truncate">Cyberpunk Collective</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface" data-icon="skip_previous">skip_previous</span>
+<div class="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="pause" style="font-variation-settings: 'FILL' 1;">pause</span>
+</div>
+<span class="material-symbols-outlined text-on-surface" data-icon="skip_next">skip_next</span>
+</div>
+<div class="absolute bottom-0 left-0 h-[2px] bg-tertiary-dim w-1/3"></div>
+</div>
+</body></html>
