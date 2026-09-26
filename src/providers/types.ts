@@ -2,7 +2,9 @@ export interface Track {
   id: string;
   title: string;
   artist: string;
+  artistId?: string;
   album?: string;
+  albumId?: string;
   duration: number;
   thumbnail?: string;
   streamUrl?: string;
@@ -13,12 +15,15 @@ export interface Track {
   bitrate?: number;
   isLiked?: boolean;
   alternatives?: Track[];
+  language?: string;
+  explicit?: boolean;
 }
 
 export interface Album {
   id: string;
   title: string;
   artist: string;
+  artistId?: string;
   thumbnail?: string;
   year?: number;
   trackCount?: number;
@@ -45,6 +50,17 @@ export interface Playlist {
   createdAt: number;
   updatedAt: number;
   isUserCreated: boolean;
+  isCollaborative?: boolean;
+  /** Linked Supabase collab_playlists id (src/social/collab.ts). */
+  collabId?: string;
+  authorId?: string;
+  rules?: SmartPlaylistRule[];
+}
+
+export interface SmartPlaylistRule {
+  field: 'artist' | 'year' | 'genre' | 'source';
+  operator: 'contains' | 'equals' | 'greater' | 'less';
+  value: string | number;
 }
 
 export interface SearchResults {
@@ -59,6 +75,17 @@ export interface StreamInfo {
   quality: string;
   mimeType: string;
   bitrate?: number;
+  cors?: boolean;
+  expiresAt?: number;
+}
+
+export interface HomeSection {
+  id: string;
+  title: string;
+  subtitle?: string;
+  tracks?: Track[];
+  albums?: Album[];
+  playlists?: { id: string; title: string; thumbnail?: string; source: ProviderName; sourceId: string; subtitle?: string }[];
 }
 
 export interface LyricLine {
@@ -72,7 +99,7 @@ export interface Lyrics {
   source: string;
 }
 
-export type ProviderName = 'youtube' | 'soundcloud' | 'jiosaavn' | 'bandcamp';
+export type ProviderName = 'youtube' | 'soundcloud' | 'jiosaavn' | 'bandcamp' | 'local' | 'podcast';
 
 export type RepeatMode = 'off' | 'one' | 'all';
 
@@ -83,9 +110,15 @@ export interface MusicProvider {
   color: string;
   enabled: boolean;
 
-search(query: string, limit?: number): Promise<SearchResults>;
+  search(query: string, limit?: number, opts?: { signal?: AbortSignal }): Promise<SearchResults>;
   getStreamUrl(track: Track): Promise<StreamInfo | null>;
   getTrackInfo?(sourceId: string): Promise<Track | null>;
   getTrending?(limit?: number): Promise<Track[]>;
-  getArtistTracks?(artistId: string): Promise<Track[]>;
+  getArtistDetails?(artistId: string): Promise<{ artist: Artist; topTracks: Track[]; albums: Album[] }>;
+  getAlbumDetails?(albumId: string): Promise<{ album: Album; tracks: Track[] }>;
+  getPlaylist?(playlistId: string): Promise<Track[]>;
+  scanFiles?(): Promise<Track[]>;
+  getRadio?(seed: Track, limit?: number): Promise<Track[]>;
+  getHomeSections?(): Promise<HomeSection[]>;
+  getPlaylistDetails?(playlistId: string): Promise<{ title: string; thumbnail?: string; tracks: Track[] }>;
 }

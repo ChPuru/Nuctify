@@ -14,7 +14,14 @@ if (isNativeApp()) {
   };
 }
 
-import './providers';
+import { registry } from './providers';
+
+try {
+  const prefs = JSON.parse(localStorage.getItem('nuctify_provider_prefs') || '{}');
+  for (const p of registry.getAll()) {
+    if (typeof prefs[p.name] === 'boolean' && !(p.name === 'youtube' && !isNativeApp())) p.enabled = prefs[p.name];
+  }
+} catch {}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

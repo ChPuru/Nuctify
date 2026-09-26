@@ -11,9 +11,11 @@ export const bandcampProvider: MusicProvider = {
 async search(query: string, limit = 20): Promise<SearchResults> {
     try {
 
-const url = `/api/bandcamp/api/bcsearch_public_api/1/autocomplete_elastic?q=${encodeURIComponent(query)}&search_filter=t`;
-
-const response = await nativeFetch(url);
+const response = await nativeFetch('/api/bandcamp/api/bcsearch_public_api/1/autocomplete_elastic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ search_text: query, search_filter: 't', full_page: false, fan_id: null }),
+      });
       if (!response.ok) {
         return { tracks: [], albums: [], artists: [], source: 'bandcamp' };
       }

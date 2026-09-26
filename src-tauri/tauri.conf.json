@@ -16,14 +16,26 @@
         "width": 1280,
         "height": 800,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "label": "main",
+        "dragDropEnabled": false,
+        "minWidth": 380,
+        "minHeight": 600,
+        "center": true,
+        "backgroundColor": "#0e0e13"
       }
     ],
     "security": {
       "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: asset: https: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com; connect-src 'self' https: http: ws: wss: data: blob: ipc:; img-src 'self' https: http: data: blob: asset:; media-src 'self' https: http: data: blob: asset:;",
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": {
+          "allow": [
+            "$AUDIO/**",
+            "$HOME/Music/**"
+          ],
+          "deny": []
+        }
       }
     }
   },
@@ -36,6 +48,9 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "Nuctify",
+    "category": "Music",
+    "shortDescription": "Nuctify music player"
   }
 }

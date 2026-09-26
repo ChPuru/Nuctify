@@ -3,7 +3,8 @@
   "identifier": "default",
   "description": "Nuctify default capabilities",
   "windows": [
-    "main"
+    "main",
+    "mini-player"
   ],
   "permissions": [
     "core:default",
@@ -11,6 +12,8 @@
     "core:window:allow-show",
     "core:window:allow-hide",
     "core:window:allow-set-focus",
+    "core:window:allow-close",
+    "core:webview:allow-create-webview-window",
     "core:event:default",
     "core:event:allow-listen",
     "core:event:allow-emit",
@@ -20,12 +23,26 @@
     "notification:allow-notify",
     "global-shortcut:default",
     "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
+    "global-shortcut:allow-unregister-all",
     "os:default",
     {
       "identifier": "http:default",
       "allow": [
-        { "url": "https://**" },
-        { "url": "http://**" }
+        {
+          "url": "https://**"
+        }
+      ],
+      "deny": [
+        {
+          "url": "https://localhost/**"
+        },
+        {
+          "url": "https://127.0.0.1/**"
+        },
+        {
+          "url": "http://**"
+        }
       ]
     }
   ]

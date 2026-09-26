@@ -1,8 +1,10 @@
 export function formatTime(seconds: number): string {
   if (!seconds || isNaN(seconds) || !isFinite(seconds)) return '0:00';
-  const mins = Math.floor(seconds / 60);
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const ss = secs.toString().padStart(2, '0');
+  return hrs > 0 ? `${hrs}:${mins.toString().padStart(2, '0')}:${ss}` : `${mins}:${ss}`;
 }
 
 export function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {

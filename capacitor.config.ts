@@ -10,11 +10,15 @@ const config: CapacitorConfig = {
     // Allow navigation to external domains for OAuth flows
     allowNavigation: ['*.supabase.co', 'accounts.google.com'],
   },
+  backgroundColor: '#0e0e13',
   android: {
     // Allow mixed content (HTTP audio streams from some CDNs)
     allowMixedContent: true,
   },
   plugins: {
+    SystemBars: {
+      style: 'DARK',
+    },
     // Route ALL fetch() calls through native HTTP engine (Java/Kotlin)
     // This completely bypasses WebView CORS restrictions.
     // YouTube, LRCLIB lyrics, and all other API calls will work natively.

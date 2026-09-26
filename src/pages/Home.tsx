@@ -1,181 +1,239 @@
-import { useState, useEffect } from 'react';
-import { usePlayerStore, useLibraryStore } from '../store';
+import MadeForYouShelf from '../components/MadeForYouShelf';
+import { useState, useEffect, useMemo } from 'react';
+import { usePlayerStore, useLibraryStore, useSearchStore } from '../store';
+import { useNavStore } from '../store/nav';
 import { registry } from '../providers';
-import { Track } from '../providers/types';
+import { Track, HomeSection } from '../providers/types';
 import { isNativeApp } from '../utils/env';
+import { getGreeting } from '../utils';
+import { playRemote } from './Album';
+import { Artwork, Button, IconButton, MediaCard, Shelf, SkeletonShelf, cn } from '../components/ui';
+
+const CACHE_TTL = 10 * 60_000;
+let trendingCache: { at: number; tracks: Track[] } | null = null;
+let sectionsCache: { at: number; sections: HomeSection[] } | null = null;
+let discoveryCache: { key: string; tracks: Track[] } | null = null;
+
+const firstArtist = (s: string) => s.split(/\s*(?:,|&|\bfeat\.?|\bft\.?|\bx\b)\s*/i)[0]?.trim() || s;
+
+interface Pick { key: string; title: string; image?: string; icon?: string; onClick: () => void; active?: boolean }
+
+function QuickPick({ p, playing }: { p: Pick; playing: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={p.onClick}
+      className={cn('group flex items-center gap-3 h-14 sm:h-16 pr-3 rounded-lg overflow-hidden bg-on-surface/[0.07] text-left transition-colors duration-150 can-hover:hover:bg-on-surface/[0.14] active:scale-[0.99]', p.active && 'text-primary')}
+    >
+      {p.icon && !p.image ? (
+        <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center bg-gradient-to-br from-primary to-secondary text-on-primary">
+          <span aria-hidden className="material-symbols-outlined filled text-2xl">{p.icon}</span>
+        </div>
+      ) : (
+        <Artwork src={p.image} size="md" rounded="md" className="!rounded-none sm:w-16 sm:h-16 shrink-0" />
+      )}
+      <span className={cn('flex-1 min-w-0 text-[13px] sm:text-sm font-bold line-clamp-2', p.active ? 'text-primary' : 'text-on-surface')}>{p.title}</span>
+      {p.active && playing && <span aria-hidden className="material-symbols-outlined text-primary text-xl shrink-0">graphic_eq</span>}
+    </button>
+  );
+}
 
 export default function HomePage() {
-  const [trending, setTrending] = useState<Track[]>([]);
-  const { setQueue } = usePlayerStore();
-  const { recentlyPlayed } = useLibraryStore();
+  const [trending, setTrending] = useState<Track[] | null>(trendingCache?.tracks ?? null);
+  const [sections, setSections] = useState<HomeSection[] | null>(sectionsCache?.sections ?? null);
+  const [discovery, setDiscovery] = useState<Track[]>(discoveryCache?.tracks ?? []);
+  const [reload, setReload] = useState(0);
+  const isPlaying = usePlayerStore(s => s.isPlaying);
+  const currentId = usePlayerStore(s => s.currentTrack?.id);
+  const history = useLibraryStore(s => s.listeningHistory);
+  const legacyRecent = useLibraryStore(s => s.recentlyPlayed);
+  const likedTracks = useLibraryStore(s => s.likedTracks);
+  const playlists = useLibraryStore(s => s.playlists);
+  const pinned = useLibraryStore(s => s.pinnedPlaylists);
+  const followed = useLibraryStore(s => s.followedArtists);
+  const navigate = useNavStore(s => s.navigate);
 
-useEffect(() => {
-    loadTrending();
-  }, []);
-
-const loadTrending = async () => {
-    try {
-      const tracks = await registry.getTrendingAll(20);
-      setTrending(tracks);
-    } catch (error) {
-      console.error('Failed to load trending:', error);
+  useEffect(() => {
+    let cancelled = false;
+    const stale = (at?: number) => reload > 0 || !at || Date.now() - at > CACHE_TTL;
+    if (stale(trendingCache?.at)) {
+      registry.getTrendingAll(20)
+        .then(tracks => { if (tracks.length) trendingCache = { at: Date.now(), tracks }; if (!cancelled) setTrending(tracks.length ? tracks : trendingCache?.tracks ?? []); })
+        .catch(() => { if (!cancelled) setTrending(t => t ?? []); });
     }
+    if (stale(sectionsCache?.at)) {
+      registry.getHomeSections()
+        .then(res => { if (res.length) sectionsCache = { at: Date.now(), sections: res }; if (!cancelled) setSections(res.length ? res : sectionsCache?.sections ?? []); })
+        .catch(() => { if (!cancelled) setSections(s => s ?? []); });
+    }
+    const counts = Object.values(useLibraryStore.getState().playCounts);
+    if (counts.length) {
+      const topArtist = firstArtist(counts.sort((a, b) => b.count - a.count)[0].artist);
+      if (discoveryCache?.key !== topArtist || reload > 0) {
+        registry.searchAll(`${topArtist} mix`, 15)
+          .then(r => { discoveryCache = { key: topArtist, tracks: r.tracks }; if (!cancelled) setDiscovery(r.tracks); })
+          .catch(() => {});
+      }
+    }
+    return () => { cancelled = true; };
+  }, [reload]);
+
+  const recent = useMemo(() => {
+    const seen = new Set<string>();
+    const out: Track[] = [];
+    for (const t of [...history.map(h => h.track), ...legacyRecent]) {
+      if (!seen.has(t.id)) { seen.add(t.id); out.push(t); }
+      if (out.length >= 20) break;
+    }
+    return out;
+  }, [history, legacyRecent]);
+
+  const topArtists = useMemo(() => {
+    const map = new Map<string, { name: string; id?: string; image?: string; count: number }>();
+    for (const { track } of history.slice(0, 300)) {
+      const name = firstArtist(track.artist || '');
+      if (!name || /unknown/i.test(name)) continue;
+      const key = name.toLowerCase();
+      const e = map.get(key) ?? { name, count: 0, image: track.thumbnail };
+      e.count++;
+      if (!e.id && track.artistId && !/[,&]/.test(track.artist)) e.id = track.artistId;
+      map.set(key, e);
+    }
+    return [...map.values()].filter(a => a.count > 1).sort((a, b) => b.count - a.count).slice(0, 12).map(a => {
+      const f = followed.find(x => x.id === a.id || x.name.toLowerCase() === a.name.toLowerCase());
+      return f ? { ...a, id: f.id, image: f.image || a.image } : a;
+    });
+  }, [history, followed]);
+
+  const playList = (track: Track, list: Track[]) => {
+    const st = usePlayerStore.getState();
+    if (track.id === st.currentTrack?.id) st.togglePlay();
+    else st.playTracks(list, Math.max(0, list.findIndex(t => t.id === track.id)));
   };
 
-const playTrack = (track: Track, list: Track[]) => {
-    setQueue(list, list.findIndex(t => t.id === track.id));
-  };
+  const picks = useMemo<Pick[]>(() => {
+    const out: Pick[] = [];
+    if (likedTracks.length) out.push({ key: 'liked', title: 'Liked Songs', icon: 'favorite', onClick: () => navigate('liked') });
+    const pls = [...playlists].sort((a, b) => (pinned.includes(b.id) ? 1 : 0) - (pinned.includes(a.id) ? 1 : 0) || b.updatedAt - a.updatedAt).slice(0, 3);
+    for (const p of pls) out.push({ key: p.id, title: p.name, image: p.thumbnail || p.tracks[0]?.thumbnail, icon: 'queue_music', onClick: () => navigate(`playlist:${p.id}`) });
+    for (const t of recent) {
+      if (out.length >= 8) break;
+      out.push({ key: t.id, title: t.title, image: t.thumbnail, icon: 'music_note', onClick: () => playList(t, recent), active: t.id === currentId });
+    }
+    return out;
+  }, [likedTracks.length, playlists, pinned, recent, currentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-const recentTrack = recentlyPlayed[0];
+  const trackCard = (t: Track, list: Track[]) => (
+    <MediaCard key={t.id} title={t.title} subtitle={t.artist} image={t.thumbnail} icon="music_note" playing={t.id === currentId && isPlaying} onPlay={() => playList(t, list)} />
+  );
 
-return (
-    <div className="fade-in animate-[fadeIn_0.5s_ease-out]">
+  const loading = sections === null && trending === null;
+  const nothing = sections !== null && trending !== null && !sections.length && !trending.length;
 
-{recentTrack && (
-        <section className="mb-12">
-          <div className="flex justify-between items-end mb-8">
-            <div>
-              <span className="text-[10px] text-primary tracking-[0.2em] mb-2 block uppercase font-bold">Resuming Session</span>
-              <h2 className="text-4xl font-headline font-extrabold tracking-tight text-white">Recently Played</h2>
-            </div>
-            <button className="text-secondary text-sm font-bold flex items-center gap-2 hover:gap-3 transition-all">
-              View History <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </button>
+  return (
+    <div className="space-y-10 sm:space-y-12 pt-2 sm:pt-4 animate-fade-in">
+      <section aria-labelledby="greeting">
+        <div className="flex items-center justify-between gap-4 mb-4 sm:mb-5">
+          <h1 id="greeting" className="text-2xl sm:text-3xl lg:text-4xl font-headline font-extrabold tracking-tight text-on-surface">{getGreeting()}</h1>
+          <IconButton icon="refresh" label="Refresh" size="sm" onClick={() => setReload(r => r + 1)} />
+        </div>
+        {picks.length > 0 ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            {picks.map((p, i) => <div key={p.key} className={i >= 6 ? 'hidden lg:block' : undefined}><QuickPick p={p} playing={isPlaying} /></div>)}
           </div>
-
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 relative group overflow-hidden rounded-[2rem] h-[400px] cursor-pointer" onClick={() => playTrack(recentTrack, recentlyPlayed)}>
-              <img className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={recentTrack.thumbnail || ''} alt={recentTrack.title} />
-              <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent"></div>
-              <div className="absolute inset-x-0 bottom-0 p-10 backdrop-blur-md bg-surface-container-low/30 border-t border-white/10">
-                <div className="flex justify-between items-end">
-                  <div className="max-w-[70%]">
-                    <h3 className="text-3xl font-headline font-extrabold mb-2 text-white truncate">{recentTrack.title}</h3>
-                    <p className="text-slate-300 font-medium tracking-wide truncate">{recentTrack.artist} • {recentTrack.source.toUpperCase()}</p>
-                  </div>
-                  <button className="w-16 h-16 rounded-full glass-gradient flex items-center justify-center shadow-2xl active:scale-90 transition-transform">
-                    <span className="material-symbols-outlined text-black text-3xl filled">play_arrow</span>
-                  </button>
-                </div>
-              </div>
+        ) : (
+          <div className="rounded-2xl bg-surface-container p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <p className="font-headline text-lg font-bold text-on-surface">Start listening</p>
+              <p className="text-sm text-on-surface-variant">Search for songs, artists and albums across every source. Your picks will show up here.</p>
             </div>
+            <Button variant="primary" icon="search" onClick={() => navigate('search')}>Search music</Button>
+          </div>
+        )}
+      </section>
 
-{recentlyPlayed[1] && (
-              <div className="relative group overflow-hidden rounded-[2rem] h-[400px] cursor-pointer" onClick={() => playTrack(recentlyPlayed[1], recentlyPlayed)}>
-                <img className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={recentlyPlayed[1].thumbnail || ''} alt={recentlyPlayed[1].title} />
-                <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
-                <div className="absolute inset-x-0 bottom-0 p-8 py-10 backdrop-blur-md bg-surface-container-high/40">
-                  <h4 className="text-xl font-headline font-bold text-white truncate">{recentlyPlayed[1].title}</h4>
-                  <p className="text-slate-400 text-sm truncate">{recentlyPlayed[1].artist}</p>
-                </div>
-              </div>
-            )}
+      {recent.length > 0 && (
+        <Shelf title="Jump back in" onSeeAll={() => navigate('recent')}>
+          {recent.map(t => trackCard(t, recent))}
+        </Shelf>
+      )}
+
+      {loading && <><SkeletonShelf /><SkeletonShelf /></>}
+
+      {trending && trending.length > 0 && (
+        <Shelf title="Trending now" subtitle="What everyone's playing">
+          {trending.map(t => trackCard(t, trending))}
+        </Shelf>
+      )}
+
+      {topArtists.length > 0 && (
+        <Shelf title="Your top artists" itemClassName="w-[34vw] max-w-[9.5rem] sm:w-40 sm:max-w-none">
+          {topArtists.map(a => (
+            <MediaCard
+              key={a.name}
+              title={a.name}
+              subtitle="Artist"
+              image={a.image}
+              shape="circle"
+              onClick={() => {
+                if (a.id) navigate(`artist:${a.id}`);
+                else { useSearchStore.getState().search(a.name); navigate('search'); }
+              }}
+            />
+          ))}
+        </Shelf>
+      )}
+
+      {sections?.map(section => (
+        <Shelf key={section.id} title={section.title} subtitle={section.subtitle}>
+          {[
+            ...(section.tracks ?? []).map(t => trackCard(t, section.tracks!)),
+            ...(section.albums ?? []).map(a => (
+              <MediaCard key={a.id} title={a.title} subtitle={[a.year, a.artist].filter(Boolean).join(' • ')} image={a.thumbnail} onClick={() => navigate(`album:${a.id}`)} onPlay={() => playRemote('album', a.id)} />
+            )),
+            ...(section.playlists ?? []).map(p => (
+              <MediaCard key={p.id} title={p.title} subtitle={p.subtitle} image={p.thumbnail} icon="queue_music" onClick={() => navigate(`remote-playlist:${p.id}`)} onPlay={() => playRemote('playlist', p.id)} />
+            )),
+          ]}
+        </Shelf>
+      ))}
+
+      {sections === null && !loading && <SkeletonShelf />}
+
+      <MadeForYouShelf />
+
+      {discovery.length > 0 && (
+        <Shelf title="More of what you like" subtitle="Based on what you play most">
+          {discovery.map(t => trackCard(t, discovery))}
+        </Shelf>
+      )}
+
+      {nothing && (
+        <div className="rounded-2xl bg-surface-container p-6 flex flex-col items-center text-center gap-3">
+          <span aria-hidden className="material-symbols-outlined text-4xl text-on-surface-variant">cloud_off</span>
+          <p className="font-bold text-on-surface">Couldn't load recommendations</p>
+          <p className="text-sm text-on-surface-variant">Check your connection and try again.</p>
+          <Button icon="refresh" onClick={() => { setTrending(null); setSections(null); setReload(r => r + 1); }}>Retry</Button>
+        </div>
+      )}
+
+      {!isNativeApp() && (
+        <section className="rounded-2xl bg-surface-container p-5 sm:p-8 flex flex-col md:flex-row md:items-center gap-5">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold uppercase tracking-wider text-primary mb-1">Take it with you</p>
+            <h2 className="text-xl sm:text-2xl font-headline font-extrabold text-on-surface">Get the Nuctify app</h2>
+            <p className="text-sm text-on-surface-variant mt-1 max-w-xl">Background playback, media keys, offline downloads and Discord presence.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a href="https://github.com/ChPuru/Nuctify/releases/download/exe/Nuctify_0.1.0_x64-setup.exe" className="inline-flex items-center gap-2 h-10 px-5 rounded-full bg-primary text-on-primary text-sm font-bold hover:brightness-110 transition">
+              <span aria-hidden className="material-symbols-outlined text-lg">desktop_windows</span>Windows
+            </a>
+            <a href="https://github.com/ChPuru/Nuctify/releases/download/apk/app-release.apk" className="inline-flex items-center gap-2 h-10 px-5 rounded-full bg-on-surface/10 text-on-surface text-sm font-bold hover:bg-on-surface/[0.15] transition">
+              <span aria-hidden className="material-symbols-outlined text-lg">android</span>Android
+            </a>
           </div>
         </section>
       )}
-
-<section className="mb-16">
-        <h2 className="text-2xl font-headline font-bold mb-8 text-white">Trending Now</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {trending.slice(0, 10).map((track, idx) => (
-            <div key={track.id} className={`group flex flex-col gap-4 cursor-pointer ${idx >= 4 ? 'hidden lg:flex' : ''}`} onClick={() => playTrack(track, trending)}>
-              <div className="aspect-square rounded-2xl overflow-hidden relative glass-card">
-                <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src={track.thumbnail || ''} alt={track.title} />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="material-symbols-outlined text-white text-5xl filled shadow-2xl">play_circle</span>
-                </div>
-              </div>
-              <div className="px-1">
-                <h4 className="font-bold text-white group-hover:text-primary transition-colors truncate">{track.title}</h4>
-                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1 truncate">{track.artist}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-<section className="mb-12">
-        <h2 className="text-2xl font-headline font-bold mb-8 text-white">Curated For You</h2>
-        <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar">
-          <div className="flex-none w-72 p-1 rounded-[2.5rem] bg-gradient-to-br from-primary to-secondary transition-transform hover:scale-105 cursor-pointer" onClick={() => {}}>
-            <div className="bg-surface rounded-[2.4rem] p-6 h-full flex flex-col justify-between">
-              <div>
-                <div className="flex gap-1 mb-4">
-                  <div className="w-1.5 h-6 bg-tertiary rounded-full"></div>
-                  <div className="w-1.5 h-10 bg-primary rounded-full"></div>
-                  <div className="w-1.5 h-8 bg-secondary rounded-full"></div>
-                </div>
-                <h4 className="text-2xl font-bold font-headline mb-2 leading-tight text-white">Global Hits</h4>
-                <p className="text-sm text-slate-400">The most streamed tracks worldwide, right now.</p>
-              </div>
-            </div>
-          </div>
-
-<div className="flex-none w-72 p-1 rounded-[2.5rem] bg-gradient-to-br from-secondary to-tertiary transition-transform hover:scale-105 cursor-pointer" onClick={() => {}}>
-            <div className="bg-surface rounded-[2.4rem] p-6 h-full flex flex-col justify-between">
-              <div>
-                <div className="flex gap-1 mb-4">
-                  <div className="w-1.5 h-10 bg-secondary rounded-full"></div>
-                  <div className="w-1.5 h-6 bg-tertiary rounded-full"></div>
-                  <div className="w-1.5 h-8 bg-primary rounded-full"></div>
-                </div>
-                <h4 className="text-2xl font-bold font-headline mb-2 leading-tight text-white">Weekend Warmup</h4>
-                <p className="text-sm text-slate-400">High-energy anthems for your night out.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {!isNativeApp() && (
-        <section className="mb-24 mt-12">
-        <div className="relative overflow-hidden rounded-[3rem] bg-surface-container-high/30 border border-white/5 p-12 lg:p-20">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
-
-<div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-            <div className="max-w-2xl text-center lg:text-left">
-              <span className="text-secondary font-bold tracking-[0.3em] uppercase text-[10px] mb-4 block">Take it with you</span>
-              <h2 className="text-4xl md:text-6xl font-headline font-extrabold tracking-tight text-white mb-6">Nuctify, everywhere.</h2>
-              <p className="text-lg text-slate-400 font-medium leading-relaxed mb-10">
-                Experience the ultimate music aggregator with native performance. Get global media keys, Discord integration, and background playback.
-              </p>
-
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                <a 
-                  href="https://github.com/ChPuru/Nuctify/releases/download/exe/Nuctify_0.1.0_x64-setup.exe" 
-                  className="group flex items-center gap-4 px-8 py-4 bg-white text-black rounded-2xl font-bold transition-all hover:scale-105 active:scale-95"
-                >
-                  <span className="material-symbols-outlined text-2xl">desktop_windows</span>
-                  <div className="text-left">
-                    <p className="text-[10px] uppercase tracking-wider opacity-60">Download for</p>
-                    <p className="text-lg leading-tight">Windows (.exe)</p>
-                  </div>
-                </a>
-
-<a 
-                  href="https://github.com/ChPuru/Nuctify/releases/download/apk/app-release.apk" 
-                  className="group flex items-center gap-4 px-8 py-4 bg-surface-container-highest border border-white/10 text-white rounded-2xl font-bold transition-all hover:bg-white/10 hover:scale-105 active:scale-95"
-                >
-                  <span className="material-symbols-outlined text-2xl">android</span>
-                  <div className="text-left">
-                    <p className="text-[10px] uppercase tracking-wider opacity-60">Download for</p>
-                    <p className="text-lg leading-tight">Android (.apk)</p>
-                  </div>
-                </a>
-              </div>
-            </div>
-
-<div className="relative w-full lg:w-1/3 flex justify-center">
-              <div className="relative w-48 h-48 bg-gradient-to-br from-primary to-secondary rounded-full animate-pulse blur-3xl opacity-20 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              <div className="relative z-10 glass-card p-6 rounded-3xl border border-white/20 transform rotate-6 hover:rotate-0 transition-transform duration-500 shadow-2xl">
-                <span className="material-symbols-outlined text-[120px] text-white opacity-20">install_mobile</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      )}
-
-</div>
+    </div>
   );
 }

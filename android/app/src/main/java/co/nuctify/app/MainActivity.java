@@ -1,95 +1,78 @@
 package co.nuctify.app;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.Manifest;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebSettings;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
+import org.json.JSONObject;
 
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "MainActivity";
 
-private final BroadcastReceiver mediaReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Log.d(TAG, "onReceive: Received broadcast action = " + action);
+    private final AudioService.CommandListener commandListener = action -> runOnUiThread(() -> {
+        if (getBridge() == null || getBridge().getWebView() == null) return;
+        String js = "window.dispatchEvent(new CustomEvent('native_media_control', { detail: { action: "
+            + JSONObject.quote(action) + " } }));";
+        getBridge().getWebView().evaluateJavascript(js, null);
+    });
 
-if ("co.nuctify.app.JS_EVENT".equals(action)) {
-                final String cmd = intent.getStringExtra("action");
-                final String fullAction = intent.getStringExtra("fullAction");
-                Log.d(TAG, "onReceive: Forwarding to JS - cmd: " + cmd);
-
-runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String js = String.format(
-                            "window.dispatchEvent(new CustomEvent('native_media_control', { detail: { action: '%s', fullAction: '%s' } }));",
-                            cmd, fullAction
-                        );
-                        getBridge().getWebView().evaluateJavascript(js, null);
-                    }
-                });
-            }
-        }
-    };
-
-@Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-WebSettings webSettings = this.bridge.getWebView().getSettings();
+        WebSettings webSettings = this.bridge.getWebView().getSettings();
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         webSettings.setMediaPlaybackRequiresUserGesture(false);
 
-IntentFilter filter = new IntentFilter("co.nuctify.app.JS_EVENT");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(mediaReceiver, filter, Context.RECEIVER_EXPORTED);
-        } else {
-            registerReceiver(mediaReceiver, filter);
+        AudioService.listener = commandListener;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1001);
         }
 
-Intent serviceIntent = new Intent(this, AudioService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
-        }
-
-this.bridge.getWebView().addJavascriptInterface(new Object() {
+        this.bridge.getWebView().addJavascriptInterface(new Object() {
             @android.webkit.JavascriptInterface
             public void updateMetadata(String title, String artist) {
-                Log.d(TAG, "JS: updateMetadata(" + title + ", " + artist + ")");
-                Intent intent = new Intent(MainActivity.this, AudioService.class);
-                intent.setAction(AudioService.ACTION_UPDATE_META);
-                intent.putExtra("title", title);
-                intent.putExtra("artist", artist);
-                intent.putExtra("from_js", true);
-                startService(intent);
+                AudioService.pendingTitle = title != null ? title : "Nuctify";
+                AudioService.pendingArtist = artist != null ? artist : "";
+                runOnUiThread(() -> {
+                    AudioService svc = AudioService.instance;
+                    if (svc != null) svc.setMeta(title, artist);
+                });
             }
 
-@android.webkit.JavascriptInterface
+            @android.webkit.JavascriptInterface
             public void updatePlaybackState(boolean playing) {
-                Log.d(TAG, "JS: updatePlaybackState(" + playing + ")");
-                Intent intent = new Intent(MainActivity.this, AudioService.class);
-                intent.setAction(playing ? AudioService.ACTION_PLAY : AudioService.ACTION_PAUSE);
-                intent.putExtra("from_js", true);
-                startService(intent);
+                runOnUiThread(() -> {
+                    AudioService svc = AudioService.instance;
+                    if (svc != null) {
+                        svc.setPlaying(playing);
+                    } else if (playing) {
+                        Intent intent = new Intent(MainActivity.this, AudioService.class);
+                        intent.setAction(AudioService.ACTION_PLAY);
+                        intent.putExtra("from_js", true);
+                        intent.putExtra(AudioService.EXTRA_TOKEN, AudioService.TOKEN);
+                        try {
+                            ContextCompat.startForegroundService(MainActivity.this, intent);
+                        } catch (Exception e) {
+                            Log.w(TAG, "Could not start AudioService", e);
+                        }
+                    }
+                });
             }
         }, "NativeBridge");
     }
 
-@Override
+    @Override
     public void onDestroy() {
-        try {
-            unregisterReceiver(mediaReceiver);
-        } catch (Exception e) {
-            Log.e(TAG, "Error unregistering receiver", e);
-        }
+        if (AudioService.listener == commandListener) AudioService.listener = null;
         super.onDestroy();
     }
 }

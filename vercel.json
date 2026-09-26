@@ -1,52 +1,21 @@
 {
   "rewrites": [
-    {
-      "source": "/api/jio1/(.*)",
-      "destination": "https://saavn.sumit.co/$1"
-    },
-    {
-      "source": "/api/jio2/(.*)",
-      "destination": "https://jiosaavn-api-privatecvc2.vercel.app/$1"
-    },
-    {
-      "source": "/api/soundcloud/(.*)",
-      "destination": "https://api-v2.soundcloud.com/$1"
-    },
-    {
-      "source": "/api/sc-site",
-      "destination": "/api/proxy?url=https://soundcloud.com"
-    },
-    {
-      "source": "/api/sc-cdn/(.*)",
-      "destination": "/api/proxy?url=https://a-v2.sndcdn.com/$1"
-    },
-    {
-      "source": "/api/lrclib/(.*)",
-      "destination": "https://lrclib.net/$1"
-    },
-    {
-      "source": "/api/spotify-auth/(.*)",
-      "destination": "https://accounts.spotify.com/$1"
-    },
-    {
-      "source": "/api/spotify/(.*)",
-      "destination": "https://api.spotify.com/$1"
-    },
-    {
-      "source": "/api/listenbrainz/(.*)",
-      "destination": "https://api.listenbrainz.org/$1"
-    },
-    {
-      "source": "/api/lastfm/(.*)",
-      "destination": "https://ws.audioscrobbler.com/$1"
-    },
-    {
-      "source": "/api/bandcamp/(.*)",
-      "destination": "https://bandcamp.com/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/jsv", "destination": "https://www.jiosaavn.com/api.php" },
+    { "source": "/api/jio1/(.*)", "destination": "https://saavn.sumit.co/api/$1" },
+    { "source": "/api/ytm/(.*)", "destination": "https://music.youtube.com/youtubei/v1/$1" },
+    { "source": "/api/soundcloud/(.*)", "destination": "https://api-v2.soundcloud.com/$1" },
+    { "source": "/api/sc-site", "destination": "/api/proxy?url=https://soundcloud.com/" },
+    { "source": "/api/sc-cdn/(.*)", "destination": "/api/proxy?url=https://a-v2.sndcdn.com/$1" },
+    { "source": "/api/lrclib/(.*)", "destination": "https://lrclib.net/api/$1" },
+    { "source": "/api/spotify-auth/(.*)", "destination": "https://accounts.spotify.com/$1" },
+    { "source": "/api/spotify/(.*)", "destination": "https://api.spotify.com/$1" },
+    { "source": "/api/listenbrainz/(.*)", "destination": "https://api.listenbrainz.org/$1" },
+    { "source": "/api/lastfm/(.*)", "destination": "https://ws.audioscrobbler.com/$1" },
+    { "source": "/api/bandcamp/(.*)", "destination": "https://bandcamp.com/$1" },
+    { "source": "/api/itunes/(.*)", "destination": "https://itunes.apple.com/$1" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] }
   ]
 }

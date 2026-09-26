@@ -25,7 +25,6 @@ function getConfig(): ScrobbleConfig {
       const parsed = JSON.parse(stored);
 
 if (!parsed.lastfm.apiKey) parsed.lastfm.apiKey = import.meta.env.VITE_LASTFM_API_KEY || '';
-      if (!parsed.lastfm.apiSecret) parsed.lastfm.apiSecret = import.meta.env.VITE_LASTFM_API_SECRET || '';
       return parsed;
     }
   } catch {}
@@ -33,7 +32,7 @@ if (!parsed.lastfm.apiKey) parsed.lastfm.apiKey = import.meta.env.VITE_LASTFM_AP
     lastfm: { 
       enabled: false, 
       apiKey: import.meta.env.VITE_LASTFM_API_KEY || '', 
-      apiSecret: import.meta.env.VITE_LASTFM_API_SECRET || '', 
+      apiSecret: '', 
       sessionKey: '', 
       username: '' 
     },
@@ -171,10 +170,11 @@ function generateLastfmSignature(params: Record<string, string>, secret: string)
   const sorted = Object.keys(params).sort();
   let signatureString = '';
   for (const key of sorted) {
+    if (key === 'format' || key === 'callback') continue;
     signatureString += key + params[key];
   }
   signatureString += secret;
-  return md5Hash(signatureString);
+  return md5Hash(unescape(encodeURIComponent(signatureString)));
 }
 
 export function getLastfmAuthUrl(apiKey: string): string {
@@ -227,19 +227,21 @@ const allParams: Record<string, string> = {
     method,
     api_key: config.lastfm.apiKey,
     sk: config.lastfm.sessionKey,
-    ...params,
   };
+  for (const [k, v] of Object.entries(params)) if (v !== '' && v != null) allParams[k] = v;
 
 const sig = generateLastfmSignature(allParams, config.lastfm.apiSecret);
   allParams.api_sig = sig;
   allParams.format = 'json';
 
 try {
-    await nativeFetch('/api/lastfm/2.0/', {
+    const res = await nativeFetch('/api/lastfm/2.0/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(allParams),
+      body: new URLSearchParams(allParams).toString(),
     });
+    const data = await res.json().catch(() => null);
+    if (data?.error) console.error(`[Last.fm] ${method} error ${data.error}: ${data.message}`);
   } catch (error) {
     console.error(`[Last.fm] ${method} failed:`, error);
   }
@@ -257,11 +259,11 @@ const payload: any = {
         track_name: track.title,
         release_name: track.album || undefined,
         additional_info: {
-          duration_ms: track.duration * 1000,
+          ...(track.duration > 0 && { duration_ms: track.duration * 1000 }),
           media_player: 'Nuctify',
           media_player_version: '0.1.0',
           submission_client: 'Nuctify',
-          music_service: `nuctify.${track.source}`,
+          music_service_name: track.source,
         },
       },
     }],
@@ -272,7 +274,7 @@ if (timestamp && listenType !== 'playing_now') {
   }
 
 try {
-    await nativeFetch('/api/listenbrainz/1/submit-listens', {
+    const res = await nativeFetch('/api/listenbrainz/1/submit-listens', {
       method: 'POST',
       headers: {
         'Authorization': `Token ${config.listenbrainz.token}`,
@@ -280,6 +282,7 @@ try {
       },
       body: JSON.stringify(payload),
     });
+    if (!res.ok) console.error(`[ListenBrainz] ${listenType} failed: HTTP ${res.status}`);
   } catch (error) {
     console.error(`[ListenBrainz] ${listenType} failed:`, error);
   }

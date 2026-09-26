@@ -3,77 +3,131 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --primary: 186 158 255;
+    --on-primary: 12 12 16;
+    --secondary: 83 221 252;
+    --tertiary: 236 99 255;
+    --background: 12 12 16;
+    --surface: 12 12 16;
+    --on-surface: 245 245 247;
+    --on-surface-variant: 161 161 170;
+    --surface-container-low: 19 19 24;
+    --surface-container: 26 26 32;
+    --surface-container-high: 34 34 41;
+    --surface-container-highest: 43 43 51;
+    --outline: 111 110 120;
+    --outline-variant: 43 43 51;
+    --error: 255 110 132;
+    --sidebar-w: 16rem;
+    --topnav-h: 4rem;
+    --mobile-nav-h: 4rem;
+    --mini-player-h: 4rem;
+    --player-h: 6rem;
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html { background: rgb(var(--background)); }
+
   body {
-    @apply bg-background text-on-surface font-body overflow-x-hidden selection:bg-secondary/30;
-    min-height: max(884px, 100dvh);
+    @apply bg-background text-on-surface font-body antialiased overflow-x-hidden;
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 { @apply font-headline tracking-tight; }
+
+  :focus-visible { outline: 2px solid rgb(var(--primary)); outline-offset: 2px; }
+  :focus:not(:focus-visible) { outline: none; }
+
+  ::selection { background: rgb(var(--primary) / 0.35); color: rgb(var(--on-surface)); }
+
+  input, textarea, [contenteditable] { user-select: text; -webkit-user-select: text; }
+
+  button, [role="button"] { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+
+  img { -webkit-user-drag: none; }
+
+  @media (hover: hover) and (pointer: fine) {
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgb(var(--on-surface) / 0.14); border: 3px solid transparent; border-radius: 9999px; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background-color: rgb(var(--on-surface) / 0.28); }
+  }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    line-height: 1;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  .skeleton {
+    background: linear-gradient(90deg, rgb(var(--on-surface) / 0.05) 0%, rgb(var(--on-surface) / 0.1) 50%, rgb(var(--on-surface) / 0.05) 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+
+  .text-muted { color: rgb(var(--on-surface-variant)); }
+
+  .pressable { @apply transition-transform duration-150 ease-out active:scale-[0.97]; }
+
+  .glass-bar {
+    background: rgb(var(--surface-container-low) / 0.82);
+    -webkit-backdrop-filter: saturate(160%) blur(20px);
+    backdrop-filter: saturate(160%) blur(20px);
   }
 }
 
 @layer utilities {
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  .custom-scrollbar, .no-scrollbar { scrollbar-width: none; }
+  .custom-scrollbar::-webkit-scrollbar, .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  .glass-card {
+    background: rgb(var(--surface-container));
+    border: 1px solid rgb(var(--on-surface) / 0.06);
   }
 
-.material-symbols-outlined.filled {
-    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  }
+  .glass-morphism { background: rgb(var(--surface-container-low)); }
 
-.custom-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+  .scrim-gradient { background: linear-gradient(to top, rgb(0 0 0 / 0.8) 0%, rgb(0 0 0 / 0) 100%); }
 
-.glass-card {
-    background: rgba(31, 31, 38, 0.4);
-    backdrop-filter: blur(24px);
-    border: 1px solid rgba(72, 71, 77, 0.15);
-  }
+  .primary-gradient, .glass-gradient { background-image: linear-gradient(135deg, rgb(var(--primary)), rgb(var(--secondary))); }
 
-.glass-morphism {
-    background: rgba(14, 14, 19, 0.6);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-  }
-
-.scrim-gradient {
-    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
-  }
-
-.primary-gradient {
-    background: linear-gradient(45deg, #ba9eff, #53ddfc);
-  }
-
-.lyrics-gradient {
+  .lyrics-gradient {
     mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
   }
 
-.visualizer-bar {
-    transition: height 0.3s ease;
+  .visualizer-bar { transition: height 0.3s ease; }
+
+  .snap-x-shelf { scroll-snap-type: x mandatory; scroll-padding-inline: 0; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .pl-safe { padding-left: env(safe-area-inset-left); }
+  .pr-safe { padding-right: env(safe-area-inset-right); }
+
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; }
+input[type=range]:focus { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-input[type=range] {
-  -webkit-appearance: none;
-  background: transparent;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-}
-input[type=range]:focus {
-  outline: none;
 }

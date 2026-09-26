@@ -1,11 +1,12 @@
 use tauri::{
-    tray::{TrayIconBuilder, TrayIconEvent},
     menu::{Menu, MenuItem},
-    Manager, Listener, WindowEvent
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    AppHandle, Listener, Manager, WindowEvent,
 };
 use discord_rich_presence::{activity, DiscordIpc, DiscordIpcClient};
-use std::sync::{Arc, Mutex};
 use serde::Deserialize;
+use std::sync::mpsc::{self, RecvTimeoutError};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[derive(Deserialize)]
 struct TrackPayload {
@@ -13,102 +14,195 @@ struct TrackPayload {
     artist: String,
 }
 
-/// Downloads audio from a URL via Rust (bypasses all CORS/webview restrictions)
-/// and saves to a temp file. Returns the file path for the webview to play.
+#[derive(serde::Serialize)]
+struct LocalTrack {
+    id: String,
+    title: String,
+    artist: String,
+    path: String,
+}
+
+const AUDIO_EXTS: &[&str] = &["mp3", "flac", "m4a", "aac", "ogg", "opus", "wav", "webm"];
+
 #[tauri::command]
-async fn proxy_audio(url: String) -> Result<String, String> {
-    let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-        .redirect(reqwest::redirect::Policy::limited(10))
-        .build()
-        .map_err(|e| format!("HTTP client error: {}", e))?;
+async fn scan_local_music() -> Result<Vec<LocalTrack>, String> {
+    let music_dir = dirs::audio_dir().ok_or("Music folder not found")?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut tracks = Vec::new();
+        for entry in walkdir::WalkDir::new(music_dir)
+            .follow_links(false)
+            .max_depth(16)
+            .into_iter()
+            .filter_map(Result::ok)
+        {
+            if !entry.file_type().is_file() {
+                continue;
+            }
+            let path = entry.path();
+            let ext = path
+                .extension()
+                .map(|e| e.to_string_lossy().to_ascii_lowercase())
+                .unwrap_or_default();
+            if !AUDIO_EXTS.contains(&ext.as_str()) {
+                continue;
+            }
+            let file_name = path.file_stem().unwrap_or_default().to_string_lossy().to_string();
+            let (artist, title) = match file_name.split_once(" - ") {
+                Some((a, t)) => (a.trim().to_string(), t.trim().to_string()),
+                None => ("Local Artist".to_string(), file_name),
+            };
+            let p = path.to_string_lossy().to_string();
+            tracks.push(LocalTrack { id: format!("local-{}", p), title, artist, path: p });
+        }
+        tracks
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
 
-    let response = client.get(&url)
-        .send()
-        .await
-        .map_err(|e| format!("Fetch error: {}", e))?;
+enum Rpc {
+    Track(String, String),
+    Playing(bool),
+}
 
-    if !response.status().is_success() {
-        return Err(format!("HTTP {}", response.status()));
+fn clamp(s: &str) -> String {
+    let mut s: String = s.chars().take(128).collect();
+    while s.chars().count() < 2 {
+        s.push(' ');
     }
+    s
+}
 
-    let bytes = response.bytes()
-        .await
-        .map_err(|e| format!("Read error: {}", e))?;
+fn now_unix() -> i64 {
+    SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs() as i64).unwrap_or(0)
+}
 
-    // Save to temp dir with a fixed name (overwritten each time)
-    let temp_dir = std::env::temp_dir().join("nuctify");
-    let _ = std::fs::create_dir_all(&temp_dir);
-    let temp_path = temp_dir.join("stream_audio.mp4");
-    
-    tokio::fs::write(&temp_path, &bytes)
-        .await
-        .map_err(|e| format!("Write error: {}", e))?;
+fn spawn_discord(client_id: &'static str) -> mpsc::Sender<Rpc> {
+    let (tx, rx) = mpsc::channel::<Rpc>();
+    std::thread::spawn(move || {
+        let mut client: Option<DiscordIpcClient> = None;
+        let mut last: Option<(String, String)> = None;
+        let (mut playing, mut since, mut dirty) = (false, 0i64, false);
+        loop {
+            match rx.recv_timeout(Duration::from_secs(15)) {
+                Ok(Rpc::Track(t, a)) => {
+                    last = Some((t, a));
+                    playing = true;
+                    since = now_unix();
+                    dirty = true;
+                }
+                Ok(Rpc::Playing(p)) => {
+                    if p && !playing {
+                        since = now_unix();
+                    }
+                    playing = p;
+                    dirty = true;
+                }
+                Err(RecvTimeoutError::Timeout) => {}
+                Err(RecvTimeoutError::Disconnected) => break,
+            }
+            if !dirty {
+                continue;
+            }
+            if client.is_none() {
+                let Ok(mut c) = DiscordIpcClient::new(client_id) else { continue };
+                if c.connect().is_err() {
+                    continue;
+                }
+                client = Some(c);
+            }
+            let Some(c) = client.as_mut() else { continue };
+            let res = match &last {
+                None => c.clear_activity(),
+                Some((t, a)) => {
+                    let details = clamp(t);
+                    let state = clamp(&if playing { format!("by {a}") } else { format!("Paused - {a}") });
+                    let mut act = activity::Activity::new()
+                        .activity_type(activity::ActivityType::Listening)
+                        .details(&details)
+                        .state(&state)
+                        .assets(activity::Assets::new().large_image("icon").large_text("Nuctify"));
+                    if playing {
+                        act = act.timestamps(activity::Timestamps::new().start(since));
+                    }
+                    c.set_activity(act)
+                }
+            };
+            if res.is_err() {
+                let _ = c.close();
+                client = None;
+            } else {
+                dirty = false;
+            }
+        }
+    });
+    tx
+}
 
-    Ok(temp_path.to_string_lossy().to_string())
+fn show_main(app: &AppHandle) {
+    if let Some(w) = app.get_webview_window("main") {
+        let _ = w.unminimize();
+        let _ = w.show();
+        let _ = w.set_focus();
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![proxy_audio])
+        .invoke_handler(tauri::generate_handler![scan_local_music])
         .setup(|app| {
-            // Setup System Tray
             let quit_i = MenuItem::with_id(app, "quit", "Quit Nuctify", true, None::<&str>)?;
             let show_i = MenuItem::with_id(app, "show", "Show Nuctify", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show_i, &quit_i])?;
 
-            let _tray = TrayIconBuilder::new()
+            let mut tray = TrayIconBuilder::with_id("main")
+                .tooltip("Nuctify")
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
-                    "quit" => {
-                        std::process::exit(0);
-                    }
-                    "show" => {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
-                    }
+                    "quit" => app.exit(0),
+                    "show" => show_main(app),
                     _ => {}
                 })
                 .on_tray_icon_event(|tray, event| {
-                    if let TrayIconEvent::Click { .. } = event {
-                        if let Some(window) = tray.app_handle().get_webview_window("main") {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        show_main(tray.app_handle());
                     }
-                })
-                .build(app)?;
+                });
+            if let Some(icon) = app.default_window_icon() {
+                tray = tray.icon(icon.clone());
+            }
+            tray.build(app)?;
 
-            // Initialize Discord RPC
-            let discord_client_id = option_env!("VITE_DISCORD_CLIENT_ID").unwrap_or("");
-            let mut client = DiscordIpcClient::new(discord_client_id).unwrap_or_else(|_| DiscordIpcClient::new("").unwrap());
-            let _ = client.connect();
-            let discord_client = Arc::new(Mutex::new(client));
-
-            let discord_clone = discord_client.clone();
-            app.listen("track_changed", move |event| {
-                if let Ok(payload) = serde_json::from_str::<TrackPayload>(event.payload()) {
-                    let mut d = discord_clone.lock().unwrap();
-                    let _ = d.set_activity(activity::Activity::new()
-                        .state(&payload.artist)
-                        .details(&payload.title)
-                        .assets(activity::Assets::new().large_image("icon").large_text("Nuctify"))
-                    );
-                }
-            });
+            if let Some(id) = option_env!("DISCORD_CLIENT_ID") {
+                let tx = spawn_discord(id);
+                let tx2 = tx.clone();
+                app.listen("track_changed", move |event| {
+                    if let Ok(p) = serde_json::from_str::<TrackPayload>(event.payload()) {
+                        let _ = tx.send(Rpc::Track(p.title, p.artist));
+                    }
+                });
+                app.listen("playback_status", move |event| {
+                    let playing = event.payload().trim().parse().unwrap_or(true);
+                    let _ = tx2.send(Rpc::Playing(playing));
+                });
+            }
 
             Ok(())
         })
-        // Close the app when the window is closed
-        .on_window_event(|_window, event| match event {
-            WindowEvent::CloseRequested { .. } => {
-                std::process::exit(0);
+        .on_window_event(|window, event| {
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                if window.label() == "main" {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
             }
-            _ => {}
         })
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())

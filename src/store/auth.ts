@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { getSupabase, isSupabaseConfigured } from '../integrations/supabase';
+import { getSupabase } from '../integrations/supabase';
+import { isNativeApp } from '../utils/env';
 
 export interface UserProfile {
   id: string;
@@ -24,6 +25,17 @@ initialize: () => Promise<void>;
   clearError: () => void;
 }
 
+let listenerRegistered = false;
+
+const toProfile = (u: any): UserProfile => ({
+  id: u.id,
+  email: u.email || '',
+  displayName: u.user_metadata?.display_name ||
+    u.user_metadata?.full_name ||
+    u.email?.split('@')[0] || 'User',
+  avatarUrl: u.user_metadata?.avatar_url,
+});
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: true,
@@ -34,37 +46,24 @@ initialize: async () => {
 
 const sb = getSupabase();
     if (sb) {
+      if (!listenerRegistered) {
+        listenerRegistered = true;
+        sb.auth.onAuthStateChange((event, session) => {
+          const prevId = get().user?.id;
+          if (session?.user) {
+            set({ user: toProfile(session.user), isLoading: false });
+            if (session.user.id !== prevId && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+              setTimeout(() => { import('./index').then(m => m.useLibraryStore.getState().fetchFromCloud()).catch(() => {}); }, 0);
+            }
+          } else if (prevId && !prevId.startsWith('local-')) {
+            set({ user: null });
+          }
+        });
+      }
       try {
         const { data: { session } } = await sb.auth.getSession();
         if (session?.user) {
-          set({
-            user: {
-              id: session.user.id,
-              email: session.user.email || '',
-              displayName: session.user.user_metadata?.display_name ||
-                session.user.user_metadata?.full_name ||
-                session.user.email?.split('@')[0] || 'User',
-              avatarUrl: session.user.user_metadata?.avatar_url,
-            },
-            isLoading: false,
-          });
-
-sb.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
-              set({
-                user: {
-                  id: session.user.id,
-                  email: session.user.email || '',
-                  displayName: session.user.user_metadata?.display_name ||
-                    session.user.user_metadata?.full_name ||
-                    session.user.email?.split('@')[0] || 'User',
-                  avatarUrl: session.user.user_metadata?.avatar_url,
-                },
-              });
-            } else {
-              set({ user: null });
-            }
-          });
+          set({ user: toProfile(session.user), isLoading: false });
           return;
         }
       } catch (e) {
@@ -95,12 +94,7 @@ if (sb) {
       }
       if (data.user) {
         set({
-          user: {
-            id: data.user.id,
-            email: data.user.email || '',
-            displayName: data.user.user_metadata?.display_name ||
-              data.user.email?.split('@')[0] || 'User',
-          },
+          user: toProfile(data.user),
           isLoading: false,
           showAuthModal: false,
         });
@@ -130,19 +124,19 @@ if (sb) {
       const { data, error } = await sb.auth.signUp({
         email,
         password,
-        options: { data: { display_name: displayName } },
+        options: { data: { display_name: displayName }, emailRedirectTo: window.location.origin },
       });
       if (error) {
         set({ authError: error.message, isLoading: false });
         return false;
       }
+      if (data.user && !data.session) {
+        set({ authError: 'Check your inbox to confirm your email, then sign in.', isLoading: false });
+        return false;
+      }
       if (data.user) {
         set({
-          user: {
-            id: data.user.id,
-            email: data.user.email || '',
-            displayName,
-          },
+          user: toProfile(data.user),
           isLoading: false,
           showAuthModal: false,
         });
@@ -170,6 +164,10 @@ signInWithGoogle: async () => {
       set({ authError: 'Cloud backend not configured. Using offline mode.' });
       return;
     }
+    if (isNativeApp()) {
+      set({ authError: 'Google sign-in is not available in the app yet. Please use email.' });
+      return;
+    }
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
@@ -182,7 +180,8 @@ signInWithGoogle: async () => {
 signOut: async () => {
     const sb = getSupabase();
     if (sb) {
-      await sb.auth.signOut();
+      const { error } = await sb.auth.signOut();
+      if (error) await sb.auth.signOut({ scope: 'local' });
     }
     localStorage.removeItem('nuctify_offline_user');
     set({ user: null, showAuthModal: false });

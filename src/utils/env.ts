@@ -1,10 +1,9 @@
 export const isNativeApp = () => {
-
-const isCapacitor = !!window.Capacitor;
-
-const isTauri = !!(window.__TAURI_INTERNALS__ || window.__TAURI__);
-
-return isCapacitor || isTauri;
+  const isCapacitor = !!window.Capacitor;
+  const isTauri = !!(window.__TAURI_INTERNALS__ || window.__TAURI__);
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  return isCapacitor || isTauri || (isMobileUA && (window.location.protocol === 'capacitor:' || window.location.protocol === 'tauri:'));
 };
 
 export const isTauriApp = () => {
@@ -13,93 +12,56 @@ return !!(window.__TAURI_INTERNALS__ || window.__TAURI__);
 };
 
 export const NATIVE_API_MAP: Record<string, string> = {
-
-'/api/inv1': 'https://invidious.projectsegfau.lt',
-  '/api/inv2': 'https://yewtu.be',
-  '/api/inv3': 'https://iv.ggtyler.dev',
-  '/api/invidious1': 'https://inv.nadeko.net',
-
-'/api/piped1': 'https://pipedapi.kavin.rocks',
-  '/api/piped2': 'https://piped.video',
-  '/api/piped3': 'https://pipedapi.kavin.rocks',
-
-'/api/jio1': 'https://saavn.sumit.co',
-  '/api/jio2': 'https://jiosaavn-api-privatecvc2.vercel.app',
-  '/api/jiosaavn1': 'https://jiosaavn-api-privatecvc2.vercel.app',
-
-'/api/soundcloud': 'https://api-v2.soundcloud.com',
+  '/api/jsv': 'https://www.jiosaavn.com/api.php',
+  '/api/jio1': 'https://saavn.sumit.co/api',
+  '/api/ytm': 'https://music.youtube.com/youtubei/v1',
+  '/api/soundcloud': 'https://api-v2.soundcloud.com',
   '/api/sc-site': 'https://soundcloud.com',
   '/api/sc-cdn': 'https://a-v2.sndcdn.com',
-
-'/api/lrclib': 'https://lrclib.net',
-
-'/api/spotify-auth': 'https://accounts.spotify.com',
+  '/api/lrclib': 'https://lrclib.net/api',
+  '/api/spotify-auth': 'https://accounts.spotify.com',
   '/api/spotify': 'https://api.spotify.com',
-
   '/api/listenbrainz': 'https://api.listenbrainz.org',
   '/api/lastfm': 'https://ws.audioscrobbler.com',
   '/api/bandcamp': 'https://bandcamp.com',
+  '/api/itunes': 'https://itunes.apple.com',
 };
+
+const SORTED_MAP = Object.entries(NATIVE_API_MAP).sort((a, b) => b[0].length - a[0].length);
 
 export const resolveEndpoint = (url: string): string => {
   if (isNativeApp()) {
-
-const sorted = Object.entries(NATIVE_API_MAP).sort((a, b) => b[0].length - a[0].length);
-    for (const [proxyRoot, realRoot] of sorted) {
+    for (const [proxyRoot, realRoot] of SORTED_MAP) {
       if (url.startsWith(proxyRoot)) {
-        return url.replace(proxyRoot, realRoot);
+        const next = url.charAt(proxyRoot.length);
+        if (next === '' || next === '/' || next === '?') return realRoot + url.slice(proxyRoot.length);
       }
     }
   }
   return url;
 };
 
-let tauriFetch: typeof globalThis.fetch | null = null;
-let tauriFetchLoaded = false;
-
-async function getTauriFetch(): Promise<typeof globalThis.fetch | null> {
-  if (tauriFetchLoaded) return tauriFetch;
-  tauriFetchLoaded = true;
-  try {
-    const mod = await import('@tauri-apps/plugin-http');
-    tauriFetch = mod.fetch;
-    console.log('[Env] Tauri HTTP plugin loaded successfully');
-    return tauriFetch;
-  } catch (e) {
-    console.warn('[Env] Tauri HTTP plugin not available, using standard fetch');
-    return null;
-  }
-}
+let tauriFetchP: Promise<typeof globalThis.fetch | null> | null = null;
+const getTauriFetch = () =>
+  (tauriFetchP ??= import('@tauri-apps/plugin-http')
+    .then(m => m.fetch as unknown as typeof globalThis.fetch)
+    .catch(() => null));
 
 export const nativeFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-  if (typeof input === 'string') {
-    const resolved = resolveEndpoint(input);
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+  const resolved = resolveEndpoint(url);
 
-    if (isTauriApp()) {
-      const tf = await getTauriFetch();
-      if (tf) return tf(resolved, init);
-    }
-
-    if (!!window.Capacitor) {
-      try {
-        const { CapacitorHttp } = await import('@capacitor/core');
-        const options = {
-          url: resolved,
-          method: init?.method || 'GET',
-          headers: (init?.headers as any) || {},
-          data: init?.body,
-        };
-        const resp = await CapacitorHttp.request(options);
-        return new Response(typeof resp.data === 'string' ? resp.data : JSON.stringify(resp.data), {
-          status: resp.status,
-          headers: resp.headers,
-        });
-      } catch (e) {
-        console.warn('[Env] CapacitorHttp failed, falling back to fetch', e);
+  if (isTauriApp() && /^https?:/i.test(resolved)) {
+    const tf = await getTauriFetch();
+    if (tf) {
+      const headers = new Headers(init?.headers);
+      if (!headers.has('Origin') && /(^|\.)youtube\.com$/.test(new URL(resolved).hostname)) {
+        headers.set('Origin', 'https://music.youtube.com');
       }
+      if (!headers.has('User-Agent')) headers.set('User-Agent', navigator.userAgent);
+      return tf(resolved, { connectTimeout: 10000, ...init, headers } as RequestInit);
     }
-
-    return fetch(resolved, init);
   }
-  return fetch(input, init);
+
+  return typeof input === 'string' || input instanceof URL ? fetch(resolved, init) : fetch(input, init);
 };
