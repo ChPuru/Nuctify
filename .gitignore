@@ -51,3 +51,28 @@ yarn-error.log*
 
 # TypeScript
 tsconfig.tsbuildinfo
+
+# Release artifacts (upload to GitHub Releases instead)
+releases/
+*.exe
+*.msi
+*.aab
+*.idsig
+
+# Signing secrets
+*.keystore
+keystore.properties
+android/key.properties
+
+# Android extras
+android/.idea/
+android/capacitor-cordova-android-plugins/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# Local tooling / agent state
+.remember/
+.claude/
+.vercel/
+*.log

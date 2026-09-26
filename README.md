@@ -1,82 +1,128 @@
+<div align="center">
+
+<img src="public/nuctify.svg" width="72" alt="Nuctify logo" />
+
 # Nuctify
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://img.shields.io/badge/Build-v0.1.0-blue)](https://github.com/ChPuru/Nuctify/releases)
+**One free player for YouTube Music, JioSaavn, SoundCloud, Bandcamp, podcasts and your own files.**
+Web, Windows and Android — one codebase, no ads, no account required.
 
-### [🚀 Download Nuctify for Windows (.exe)](https://github.com/ChPuru/Nuctify/releases/download/exe/Nuctify_0.1.0_x64-setup.exe) | [📱 Download Nuctify for Android (.apk)](https://github.com/ChPuru/Nuctify/releases/download/apk/app-release.apk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/ChPuru/Nuctify?label=release)](https://github.com/ChPuru/Nuctify/releases/latest)
+![Platforms](https://img.shields.io/badge/platforms-Web%20%7C%20Windows%20%7C%20Android-8b5cf6)
 
-Nuctify is a high-performance, cross-platform music aggregator designed to unify your streaming experience across YouTube, JioSaavn, and SoundCloud. Built with a focus on native performance and modern aesthetics, Nuctify provides a seamless experience for discovery, library management, and real-time scrobbling.
+[**⬇ Windows installer**](https://github.com/ChPuru/Nuctify/releases/latest) ·
+[**⬇ Android APK**](https://github.com/ChPuru/Nuctify/releases/latest) ·
+[Build from source](docs/BUILDING.md) ·
+[Supabase setup](docs/SUPABASE.md)
 
-## Key Features
+</div>
 
-- **Multi-Provider Search**: Aggregate results from YouTube (Invidious/Piped), JioSaavn, and SoundCloud.
-- **Native Experience**: Fully functional desktop (Tauri) and mobile (Android/Capacitor) applications.
-- **Global Control**: Native media key support and system-level notifications for background playback.
-- **Discord Integration**: Real-time Rich Presence to share your current listening session.
-- **Legacy Scrobbling**: Full support for Last.fm and ListenBrainz session tracking.
-- **Spotify Integration**: Import your existing Spotify playlists directly into the Nuctify ecosystem.
-- **Optimized UI**: Responsive design featuring fluid animations, glassmorphism, and low-latency interactions.
+<p align="center">
+  <img src="docs/screenshots/mobile-home.png" width="250" alt="Home screen on Android with trending songs" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/mobile-search.png" width="250" alt="Search results aggregated across sources" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/settings.png" width="820" alt="Desktop settings: streaming quality, crossfade, equalizer, playback speed" />
+</p>
 
-## Technology Stack
+## Features
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS
-- **State Management**: Zustand
-- **Desktop Production**: Tauri v2 (Rust backend)
-- **Mobile Production**: Capacitor (Native Android)
-- **Database / Auth**: Supabase (PostgreSQL)
-- **Audio Engine**: Custom Native Bridge for bypass-CORS playback
+**Listening**
+- Search every source at once: YouTube Music, JioSaavn, SoundCloud, Bandcamp, podcasts (iTunes) and local files
+- Synced, scrolling lyrics from LRCLIB, plus search-by-lyrics
+- Crossfade, volume normalisation, equalizer presets, playback speed and a sleep timer
+- Offline downloads (IndexedDB) and a queue with autoplay of similar songs
 
-## Getting Started
+**Library & discovery**
+- Liked songs, playlists, smart playlists, followed artists and albums
+- *Made for you*: Daily Mixes and Discover Weekly built on-device from your listening
+- Listening stats by week, month, year or all time
+- Import Spotify playlists; scrobble to Last.fm and ListenBrainz
 
-### Prerequisites
+**Social** (needs [Supabase](docs/SUPABASE.md))
+- **Jam** — listen in sync with friends in real time
+- **Blend** — merge two people's taste into one playlist
+- **Collaborative playlists** with live updates, and read-only share links
+- Cloud sync of your library across devices
 
-- Node.js (v18 or higher)
-- Rust (for Desktop builds)
-- Android Studio (for Mobile builds)
+**Native apps**
+- Windows (Tauri v2): media keys, tray icon, notifications, mini-player, Discord Rich Presence
+- Android (Capacitor 8): background playback service, lock-screen controls, native HTTP (no CORS proxy needed)
+- Seven themes (Midnight, AMOLED, Forest, Ocean, Candy, Sunset, Mono) plus a custom accent colour
 
-### Installation
+## Quick start
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/nuctify.git
-   cd nuctify
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Configure your environment:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your own API keys and Supabase URL
-   ```
-
-### Running Locally
-
-- **Web Development**: `npm run dev`
-- **Desktop Development**: `npm run tauri dev`
-- **Mobile Development**: `npx cap sync android` and run via Android Studio
-
-## Deployment
-
-### Web
-The project is optimized for deployment on Vercel or Netlify. Ensure you add your environment variables to the deployment dashboard.
-
-### Desktop
-Build production installers using:
 ```bash
-npm run tauri build
+git clone https://github.com/ChPuru/Nuctify.git
+cd Nuctify
+npm install
+cp .env.example .env   # every key is optional
+npm run dev            # http://localhost:3000
 ```
-Outputs can be found in `src-tauri/target/release/bundle/`.
 
-### Mobile
-Compile the production APK via Android Studio:
-1. Run `npm run build`
-2. Run `npx cap sync android`
-3. Open in Android Studio and select **Build > Build APK(s)**.
+With an empty `.env` the app works fully offline — search, playback, library
+and stats all run locally. Add keys to unlock extra features:
+
+| Variable | Unlocks |
+| --- | --- |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Sign-in, cloud sync, Jam, Blend, collaborative playlists — see [docs/SUPABASE.md](docs/SUPABASE.md) |
+| `VITE_PUBLIC_WEB_URL` | Share links from the desktop/Android apps |
+| `VITE_SPOTIFY_CLIENT_ID` | Spotify playlist import |
+| `VITE_LASTFM_API_KEY` | Last.fm scrobbling |
+| `VITE_DISCORD_CLIENT_ID` | Discord Rich Presence (desktop) |
+
+`VITE_*` values are compiled into the app and are public — never put a secret
+or a Supabase `service_role` key in `.env`.
+
+## Building
+
+| Target | Command | Output |
+| --- | --- | --- |
+| Web | `npm run build` | `dist/` (deploy to Vercel — `vercel.json` is included) |
+| Windows | `npm run tauri build` | `src-tauri/target/release/bundle/{nsis,msi}/` |
+| Android | `npm run build && npx cap sync android && cd android && ./gradlew assembleRelease` | `android/app/build/outputs/apk/release/` |
+
+Prerequisites, APK signing and the release checklist are in
+[docs/BUILDING.md](docs/BUILDING.md).
+
+## Project structure
+
+```
+src/
+  audio/          playback engine and offline downloads
+  providers/      one module per source (youtube, jiosaavn, soundcloud, bandcamp, podcast, local)
+  recommend/      on-device taste profile and mix generation
+  social/         Jam, Blend and collaborative playlists (Supabase)
+  integrations/   Supabase, Spotify import, Last.fm / ListenBrainz scrobbling
+  lyrics/         LRCLIB client
+  pages/          route-level screens
+  components/     player bar, now playing, queue, shared UI kit (components/ui)
+  store/          Zustand stores
+src-tauri/        Windows app (Rust): tray, media keys, Discord RPC
+android/          Android app (Capacitor) with a native audio service
+api/proxy.js      Vercel function used by the web build for SoundCloud
+supabase/         database schema (single idempotent script)
+```
+
+## Tech stack
+
+React 18 · TypeScript · Vite · Tailwind CSS · Zustand · Dexie ·
+Tauri v2 (Rust) · Capacitor 8 · Supabase (Postgres, Auth, Realtime)
+
+## Contributing
+
+Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+New sources implement the `MusicProvider` interface in
+[`src/providers/types.ts`](src/providers/types.ts).
+
+## Disclaimer
+
+Nuctify does not host any media. It plays content from third-party services
+through their public endpoints, and those services' terms apply. Use it for
+personal listening.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+[MIT](LICENSE)

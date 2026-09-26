@@ -13,7 +13,9 @@ Thank you for your interest in contributing to Nuctify. As an open-source music 
 
 - **Web**: Standard React development.
 - **Desktop**: Requires Rust and the Tauri CLI.
-- **Mobile**: Requires Android Studio and Capacitor sync.
+- **Mobile**: Requires Android Studio, JDK 21+ and `npx cap sync android`.
+
+See [docs/BUILDING.md](docs/BUILDING.md) for full build steps and [docs/SUPABASE.md](docs/SUPABASE.md) for the backend.
 
 ## Community Standards
 
@@ -31,5 +33,7 @@ If you find a bug, please open an issue with:
 ## Pull Request Process
 
 - Ensure your build passes locally with `npm run build`.
-- Update the documentation if you're introducing new features or environment variables.
+- Update the documentation if you're introducing new features or environment variables (`README.md`, `.env.example`, `docs/`).
+- If you change `supabase/schema.sql`, keep it idempotent (safe to re-run).
+- Never commit `.env`, keystores or build artifacts.
 - One of the maintainers will review your PR and provide feedback.
