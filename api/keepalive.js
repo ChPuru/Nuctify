@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   if (!url || !key) return res.status(500).send('supabase env missing');
 
   try {
-    const r = await fetch(`${url}/rest/v1/shared_playlists?select=id&limit=1`, {
+    const r = await fetch(`${url}/rest/v1/user_data?select=user_id&limit=1`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
       signal: AbortSignal.timeout(10000),
     });
